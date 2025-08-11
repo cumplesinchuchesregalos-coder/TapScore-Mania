@@ -394,7 +394,7 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
                     </div>
                 );
             } else if (activeItem?.imageUrl) {
-                // Active item is an image
+                // Active item is an image - this is the corrected logic
                 circleContent = (
                     <Image
                         src={activeItem.imageUrl}
