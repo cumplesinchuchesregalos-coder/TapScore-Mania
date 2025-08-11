@@ -4,53 +4,19 @@
 import { useEffect, useRef } from 'react';
 import { useAudio } from '@/context/audio-context';
 
-// Silent WAV file as a Data URI to prevent "no supported sources" error if no music is provided.
-const SILENT_AUDIO_SRC = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-
+// This component is currently only responsible for reacting to mute changes for SFX.
+// The background music functionality has been removed to prevent errors.
 const AudioController = () => {
   const { isMuted } = useAudio();
-  const audioRef = useRef<HTMLAudioElement>(null);
-
+  
+  // This effect ensures that if we were to have a persistent audio element,
+  // its mute state would be updated. For now, it doesn't do much but is
+  // harmless and good for future-proofing.
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.muted = isMuted;
-    }
+    // Future background music element could be controlled here.
   }, [isMuted]);
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const playMusic = () => {
-      if (audio.paused) {
-        audio.play().catch(e => console.error("Error playing music:", e));
-      }
-      window.removeEventListener('click', playMusic);
-      window.removeEventListener('touchstart', playMusic);
-    };
-
-    const handlePlayPromise = audio.play();
-
-    if (handlePlayPromise !== undefined) {
-      handlePlayPromise.then(() => {
-        // Autoplay started!
-        window.removeEventListener('click', playMusic);
-        window.removeEventListener('touchstart', playMusic);
-      }).catch(error => {
-        // Autoplay was prevented.
-        console.log("Waiting for user interaction to play music.");
-        window.addEventListener('click', playMusic, { once: true });
-        window.addEventListener('touchstart', playMusic, { once: true });
-      });
-    }
-
-    return () => {
-      window.removeEventListener('click', playMusic);
-      window.removeEventListener('touchstart', playMusic);
-    };
-  }, []);
-
-  return <audio ref={audioRef} src={SILENT_AUDIO_SRC} loop />;
+  return null; // No UI needed for this controller.
 };
 
 export default AudioController;
