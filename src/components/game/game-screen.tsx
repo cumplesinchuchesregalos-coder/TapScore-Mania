@@ -383,18 +383,17 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
         return circles.filter(c => c.player === player).map(circle => {
             const Icon = circle.type.icon;
     
-            // Determine what to render for the circle
-            let circleContent;
-    
+            let circleContent: React.ReactNode;
+
             if (Icon) {
-                // Special circles with icons (Bomb, Target, Gem)
+                // Case 1: Special circle with a dedicated icon (Bomb, Target, Gem)
                 circleContent = (
                     <div className={cn('w-full h-full flex items-center justify-center rounded-full', circle.type.color)}>
                         <Icon className="h-8 w-8 text-white" />
                     </div>
                 );
             } else if (activeItem?.imageUrl) {
-                // Active item is an image - this is the corrected logic
+                // Case 2: A custom image is equipped. Use it for all non-special circles.
                 circleContent = (
                     <Image
                         src={activeItem.imageUrl}
@@ -406,7 +405,8 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
                     />
                 );
             } else {
-                // Regular colored circle (either from active item or circle type)
+                // Case 3: No custom image equipped. Use colored circles.
+                // The color is from the circle type, unless it's a default circle, then use the active item's class.
                 const colorClass = circle.type.type === 'default' && activeItem?.className ? activeItem.className : circle.type.color;
                 circleContent = (
                     <div className={cn('w-full h-full flex items-center justify-center rounded-full text-white font-bold text-sm', colorClass)}>
