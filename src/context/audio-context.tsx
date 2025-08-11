@@ -27,7 +27,8 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     
     // Initialize a pool of audio players
     for (let i = 0; i < MAX_AUDIO_PLAYERS; i++) {
-        audioPlayers.current.push(new Audio());
+        const audio = new Audio();
+        audioPlayers.current.push(audio);
     }
 
     setHydrated(true);
@@ -42,13 +43,17 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const playSfx = useCallback((sfxUrl: string) => {
-    // Safeguard: Only play if the URL is valid and we are not muted.
+    // SAFEGUARD: Only play if the URL is valid and we are not muted.
     if (sfxUrl && !isMuted && audioPlayers.current.length > 0) {
-        const player = audioPlayers.current[currentPlayerIndex.current];
-        player.src = sfxUrl;
-        player.play().catch(e => console.error("Error playing SFX:", e.message));
+        try {
+            const player = audioPlayers.current[currentPlayerIndex.current];
+            player.src = sfxUrl;
+            player.play().catch(e => console.error("Error playing SFX:", (e as Error).message));
 
-        currentPlayerIndex.current = (currentPlayerIndex.current + 1) % MAX_AUDIO_PLAYERS;
+            currentPlayerIndex.current = (currentPlayerIndex.current + 1) % MAX_AUDIO_PLAYERS;
+        } catch (e) {
+            console.error("Caught error playing SFX:", (e as Error).message);
+        }
     }
   }, [isMuted]);
   
