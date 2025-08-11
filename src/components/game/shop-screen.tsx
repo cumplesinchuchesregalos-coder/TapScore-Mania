@@ -50,7 +50,7 @@ export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, on
                     </CardHeader>
                     <CardContent className="flex items-center justify-center p-4 flex-grow">
                       <div className={cn('w-16 h-16 transition-all duration-300 flex items-center justify-center', item.className, isActive ? 'ring-4 ring-offset-2 ring-primary' : '')}>
-                        {item.imageUrl && (
+                        {item.imageUrl ? (
                           <Image 
                             src={item.imageUrl} 
                             alt={item.name}
@@ -59,7 +59,7 @@ export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, on
                             className="rounded-full"
                             data-ai-hint={item.imageHint}
                           />
-                        )}
+                        ) : null}
                       </div>
                     </CardContent>
                     <CardFooter className="p-2">
