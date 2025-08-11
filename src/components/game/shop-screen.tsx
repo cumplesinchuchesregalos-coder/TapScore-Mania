@@ -49,7 +49,7 @@ export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, on
                       <CardDescription className="text-xs h-10">{t.shopItems[item.id]?.description || ''}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex items-center justify-center p-4 flex-grow">
-                      <div className={cn('w-16 h-16 transition-all duration-300 flex items-center justify-center', isActive ? 'ring-4 ring-offset-2 ring-primary' : '', !item.imageUrl && item.className)}>
+                      <div className={cn('w-16 h-16 transition-all duration-300 flex items-center justify-center', isActive ? 'ring-4 ring-offset-2 ring-primary rounded-full' : '')}>
                         {item.imageUrl ? (
                           <Image 
                             src={item.imageUrl} 
@@ -57,8 +57,11 @@ export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, on
                             width={64}
                             height={64}
                             data-ai-hint={item.imageHint}
+                            className="object-contain"
                           />
-                        ) : null}
+                        ) : (
+                           <div className={cn('w-full h-full', item.className)}></div>
+                        )}
                       </div>
                     </CardContent>
                     <CardFooter className="p-2">

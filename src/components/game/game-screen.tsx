@@ -386,19 +386,10 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
             const isDefaultType = circle.type.type === 'default';
             const useImageForDefault = isDefaultType && activeItem?.imageUrl;
             
-            let finalCircleStyle = '';
-            if (useImageForDefault) {
-                finalCircleStyle = 'bg-transparent';
-            } else if (isDefaultType) {
-                finalCircleStyle = activeItem?.className || 'bg-primary rounded-full';
-            } else {
-                finalCircleStyle = circle.type.color;
-            }
-            
             return (
               <div
                 key={circle.id}
-                className={cn(`absolute cursor-pointer animate-scale-in transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center text-white font-bold text-sm`, finalCircleStyle, Icon && !useImageForDefault ? '' : 'rounded-full')}
+                className={cn(`absolute cursor-pointer animate-scale-in transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center text-white font-bold text-sm`)}
                 style={{
                   left: circle.x,
                   top: circle.y,
@@ -407,18 +398,22 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
                 }}
                 onClick={(e) => handleCircleClick(e, circle.id)}
               >
-                {useImageForDefault && activeItem?.imageUrl ? (
+                {useImageForDefault ? (
                    <Image 
-                      src={activeItem.imageUrl} 
-                      alt={activeItem.name}
+                      src={activeItem!.imageUrl!} 
+                      alt={activeItem!.name}
                       width={circleDiameter}
                       height={circleDiameter}
-                      data-ai-hint={activeItem.imageHint}
+                      data-ai-hint={activeItem!.imageHint}
                     />
                 ) : Icon ? (
-                    <Icon className="h-8 w-8" />
+                    <div className={cn('w-full h-full flex items-center justify-center rounded-full', circle.type.color)}>
+                        <Icon className="h-8 w-8" />
+                    </div>
                 ) : (
-                    circle.type.points > 0 ? `+${circle.type.points}` : ''
+                    <div className={cn('w-full h-full flex items-center justify-center rounded-full', isDefaultType ? activeItem?.className : circle.type.color)}>
+                        {circle.type.points > 0 ? `+${circle.type.points}` : ''}
+                    </div>
                 )}
               </div>
             )
