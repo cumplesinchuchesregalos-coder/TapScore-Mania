@@ -383,10 +383,10 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
         return circles.filter(c => c.player === player).map(circle => {
             const Icon = circle.type.icon;
             
-            const useImage = circle.type.type === 'default' && activeItem?.imageUrl;
+            const useImageForDefault = circle.type.type === 'default' && activeItem?.imageUrl;
             
             let finalCircleStyle = '';
-            if (useImage) {
+            if (useImageForDefault) {
                 finalCircleStyle = 'bg-transparent';
             } else if (circle.type.type === 'default') {
                 finalCircleStyle = activeItem?.className || 'bg-primary rounded-full';
@@ -406,7 +406,7 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
                 }}
                 onClick={(e) => handleCircleClick(e, circle.id)}
               >
-                {useImage && activeItem?.imageUrl ? (
+                {useImageForDefault && activeItem?.imageUrl ? (
                    <Image 
                       src={activeItem.imageUrl} 
                       alt={activeItem.name}
