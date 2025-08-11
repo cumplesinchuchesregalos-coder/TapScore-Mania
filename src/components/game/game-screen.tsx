@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Pause, Play, Heart, Shield, Gem, Zap } from 'lucide-react';
+import { Pause, Play, Heart, Shield, Gem, Zap, Bomb, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/language-context';
 import { useAudio } from '@/context/audio-context';
@@ -33,19 +33,25 @@ const CIRCLE_TYPES = [
     { type: 'rare', color: 'bg-chart-4', points: 10, lifespan: 800, probability: 0.05, icon: Gem },
 ];
 
+const BOMB_TYPE = { type: 'bomb', color: 'bg-destructive', points: 0, lifespan: 3000, icon: Bomb };
+const PRECISION_TARGET_TYPE = { type: 'precision_target', color: 'bg-primary', points: 5, lifespan: 2000, icon: Target };
+const PRECISION_DECOY_TYPE = { type: 'precision_decoy', color: 'bg-muted-foreground', points: 0, lifespan: 2000 };
+
+
 interface Circle {
   id: number;
   x: number;
   y: number;
   createdAt: number;
-  type: typeof CIRCLE_TYPES[number];
+  type: typeof CIRCLE_TYPES[number] | typeof BOMB_TYPE | typeof PRECISION_TARGET_TYPE | typeof PRECISION_DECOY_TYPE;
 }
 
 interface FloatingScore {
     id: number;
     x: number;
     y: number;
-    points: number;
+    points: string;
+    color: string;
 }
 
 interface GameScreenProps {
@@ -79,6 +85,23 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
         setConsecutiveHits(0);
         setCombo(1);
     }
+    
+    const showFloatingScore = (points: number, circle: Circle) => {
+        setFloatingScores(prev => [...prev, {
+            id: Date.now(),
+            x: circle.x + CIRCLE_DIAMETER / 2,
+            y: circle.y,
+            points: `+${points}`,
+            color: "text-primary"
+        }]);
+        setTimeout(() => setFloatingScores(current => current.slice(1)), 1000);
+    }
+
+    const handleMiss = (missAmount = 1) => {
+        if(isPaused) return;
+        setMisses(m => m + missAmount);
+        resetCombo();
+    }
 
     const handleCircleClick = (e: React.MouseEvent, id: number) => {
         e.stopPropagation();
@@ -89,22 +112,28 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
 
         playSfx(SFX.tap);
 
+        if (gameMode === 'bomb') {
+            if (circle.type.type === 'bomb') {
+                onGameOver(internalScore);
+                return;
+            }
+        }
+        
+        if (gameMode === 'precision') {
+            if (circle.type.type !== 'precision_target') {
+                handleMiss();
+                setCircles(prev => prev.filter(c => c.id !== id));
+                return;
+            }
+        }
+        
         const pointsGained = circle.type.points * combo;
         const newScore = internalScore + pointsGained;
 
         setInternalScore(newScore);
         setScore(newScore);
 
-        setFloatingScores(prev => [...prev, {
-            id: Date.now(),
-            x: circle.x + CIRCLE_DIAMETER / 2,
-            y: circle.y,
-            points: pointsGained,
-        }]);
-
-        setTimeout(() => {
-            setFloatingScores(currentScores => currentScores.slice(1));
-        }, 1000);
+        showFloatingScore(pointsGained, circle);
 
         setCircles(prev => prev.filter(c => c.id !== id));
         
@@ -127,10 +156,11 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
         spawnRate.current = Math.max(300, spawnRate.current - rateDecrement);
     };
     
-    const handleMiss = () => {
+    const handleGameAreaClick = () => {
         if(isPaused) return;
-        setMisses(m => m + 1);
-        resetCombo();
+        if (gameMode !== 'precision') {
+            handleMiss();
+        }
     }
 
     const gameLoop = useCallback(() => {
@@ -144,8 +174,16 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
         if (!isPaused) {
             let missedCount = 0;
             const updatedCircles = circles.filter(circle => {
-                if (now - circle.createdAt > circle.type.lifespan) {
-                    missedCount++;
+                const isExpired = now - circle.createdAt > circle.type.lifespan;
+                if (isExpired) {
+                    // In precision, only letting targets disappear is a miss
+                    if (gameMode === 'precision' && circle.type.type === 'precision_target') {
+                        missedCount++;
+                    }
+                    // In other modes, any circle disappearing is a miss
+                    else if (gameMode !== 'precision' && circle.type.type !== 'bomb') {
+                        missedCount++;
+                    }
                     return false;
                 }
                 return true;
@@ -153,38 +191,46 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
 
             if (missedCount > 0) {
                 setCircles(updatedCircles);
-                setMisses(prev => {
-                    const newMisses = prev + missedCount;
-                    if (newMisses > prev) {
-                        resetCombo();
-                    }
-                    return Math.min(maxMisses, newMisses);
-                });
+                handleMiss(missedCount);
+            } else {
+                setCircles(updatedCircles);
             }
 
             if (now - lastSpawnTime.current > spawnRate.current) {
                 lastSpawnTime.current = now;
-                
-                const rand = Math.random();
-                let cumulativeProb = 0;
-                const circleType = CIRCLE_TYPES.find(ct => {
-                    cumulativeProb += ct.probability;
-                    return rand <= cumulativeProb;
-                }) || CIRCLE_TYPES[0];
-
                 const { width, height } = gameAreaRef.current.getBoundingClientRect();
-                const newCircle: Circle = {
+                let newCircle: Circle | null = null;
+                
+                const baseCircle = {
                     id: Date.now() + Math.random(),
                     x: Math.random() * (width - CIRCLE_DIAMETER),
                     y: Math.random() * (height - CIRCLE_DIAMETER - 80) + 80,
                     createdAt: Date.now(),
-                    type: circleType,
                 };
-                setCircles(prev => [...prev, newCircle]);
+
+                if (gameMode === 'bomb') {
+                    const type = Math.random() < 0.2 ? BOMB_TYPE : (CIRCLE_TYPES.find(ct => Math.random() <= ct.probability) || CIRCLE_TYPES[0]);
+                    newCircle = { ...baseCircle, type };
+                } else if (gameMode === 'precision') {
+                    const type = Math.random() < 0.4 ? PRECISION_TARGET_TYPE : PRECISION_DECOY_TYPE;
+                    newCircle = { ...baseCircle, type };
+                } else {
+                    const rand = Math.random();
+                    let cumulativeProb = 0;
+                    const circleType = CIRCLE_TYPES.find(ct => {
+                        cumulativeProb += ct.probability;
+                        return rand <= cumulativeProb;
+                    }) || CIRCLE_TYPES[0];
+                    newCircle = { ...baseCircle, type: circleType };
+                }
+
+                if (newCircle) {
+                    setCircles(prev => [...prev, newCircle!]);
+                }
             }
         }
         animationFrameId.current = requestAnimationFrame(gameLoop);
-    }, [isPaused, circles, maxMisses, difficulty]);
+    }, [isPaused, circles, maxMisses, difficulty, gameMode]);
 
     useEffect(() => {
         animationFrameId.current = requestAnimationFrame(gameLoop);
@@ -219,7 +265,7 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
     }
     
     return (
-        <div ref={gameAreaRef} className="w-full h-full relative bg-background overflow-hidden" onClick={handleMiss}>
+        <div ref={gameAreaRef} className="w-full h-full relative bg-background overflow-hidden" onClick={handleGameAreaClick}>
           <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-background/80 backdrop-blur-sm z-10">
             <div className="text-2xl font-bold font-headline flex items-center gap-4">
               <div className="flex items-center gap-2">
@@ -244,14 +290,14 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
           {floatingScores.map(score => (
               <div
                   key={score.id}
-                  className="absolute text-2xl font-bold text-primary animate-float-up"
+                  className={`absolute text-2xl font-bold ${score.color} animate-float-up`}
                   style={{
                       left: score.x,
                       top: score.y,
                       pointerEvents: 'none'
                   }}
               >
-                  +{score.points}
+                  {score.points}
               </div>
           ))}
 
@@ -269,7 +315,7 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
                 }}
                 onClick={(e) => handleCircleClick(e, circle.id)}
               >
-                {Icon ? <Icon className="h-6 w-6" /> : `+${circle.type.points}`}
+                {Icon ? <Icon className="h-8 w-8" /> : `+${circle.type.points}`}
               </div>
             )
           })}

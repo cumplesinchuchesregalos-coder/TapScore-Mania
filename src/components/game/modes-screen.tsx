@@ -21,8 +21,8 @@ export function ModesScreen({ onBack, onSelectMode }: ModesScreenProps) {
   const modes = [
     { id: 'classic', icon: Gamepad2, title: t.modes.classic.title, description: t.modes.classic.description, enabled: true },
     { id: 'survival', icon: Shield, title: t.modes.survival.title, description: t.modes.survival.description, enabled: true },
-    { id: 'precision', icon: Target, title: t.modes.precision.title, description: t.modes.precision.description, enabled: false },
-    { id: 'bomb', icon: Bomb, title: t.modes.bomb.title, description: t.modes.bomb.description, enabled: false },
+    { id: 'precision', icon: Target, title: t.modes.precision.title, description: t.modes.precision.description, enabled: true },
+    { id: 'bomb', icon: Bomb, title: t.modes.bomb.title, description: t.modes.bomb.description, enabled: true },
   ];
 
   const difficulties: {id: Difficulty, label: string}[] = [
