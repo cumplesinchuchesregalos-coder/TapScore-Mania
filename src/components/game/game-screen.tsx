@@ -9,8 +9,40 @@ import { useAudio } from '@/context/audio-context';
 import type { GameMode, Difficulty } from '@/app/page';
 import { SFX } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
+import { SHOP_ITEMS } from '@/lib/shop-items';
 
-const CIRCLE_DIAMETER = 60;
+interface Circle {
+  id: number;
+  x: number;
+  y: number;
+  createdAt: number;
+  type: typeof CIRCLE_TYPES[number] | typeof BOMB_TYPE | typeof PRECISION_TARGET_TYPE | typeof PRECISION_DECOY_TYPE;
+  player?: 1 | 2;
+}
+
+interface FloatingScore {
+    id: number;
+    x: number;
+    y: number;
+    points: string;
+    color: string;
+}
+
+interface GameState {
+    score: number;
+    misses: number;
+    combo: number;
+    consecutiveHits: number;
+    ghostUsed: boolean;
+}
+interface GameScreenProps {
+  onGameOver: (finalScore: number, finalScores?: [number, number]) => void;
+  circleStyle: string; // This is the activeItem ID from page.tsx
+  gameMode: GameMode;
+  difficulty: Difficulty;
+}
+
+const BASE_CIRCLE_DIAMETER = 60;
 
 const DIFFICULTY_SETTINGS = {
   easy: {
@@ -39,47 +71,16 @@ const BOMB_TYPE = { type: 'bomb', color: 'bg-destructive', points: 0, lifespan: 
 const PRECISION_TARGET_TYPE = { type: 'precision_target', color: 'bg-primary', points: 5, lifespan: 2000, icon: Target };
 const PRECISION_DECOY_TYPE = { type: 'precision_decoy', color: 'bg-muted-foreground', points: 0, lifespan: 2000 };
 
-
-interface Circle {
-  id: number;
-  x: number;
-  y: number;
-  createdAt: number;
-  type: typeof CIRCLE_TYPES[number] | typeof BOMB_TYPE | typeof PRECISION_TARGET_TYPE | typeof PRECISION_DECOY_TYPE;
-  player?: 1 | 2;
-}
-
-interface FloatingScore {
-    id: number;
-    x: number;
-    y: number;
-    points: string;
-    color: string;
-}
-
-interface GameState {
-    score: number;
-    misses: number;
-    combo: number;
-    consecutiveHits: number;
-}
-interface GameScreenProps {
-  onGameOver: (finalScore: number, finalScores?: [number, number]) => void;
-  circleStyle: string;
-  gameMode: GameMode;
-  difficulty: Difficulty;
-}
-
-export function GameScreen({ onGameOver, circleStyle, gameMode, difficulty }: GameScreenProps) {
+export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, difficulty }: GameScreenProps) {
     const { t } = useLanguage();
     const { playSfx } = useAudio();
     
     // Single player state
-    const [gameState, setGameState] = useState<GameState>({ score: 0, misses: 0, combo: 1, consecutiveHits: 0 });
+    const [gameState, setGameState] = useState<GameState>({ score: 0, misses: 0, combo: 1, consecutiveHits: 0, ghostUsed: false });
     
     // Duo mode state
-    const [p1State, setP1State] = useState<GameState>({ score: 0, misses: 0, combo: 1, consecutiveHits: 0 });
-    const [p2State, setP2State] = useState<GameState>({ score: 0, misses: 0, combo: 1, consecutiveHits: 0 });
+    const [p1State, setP1State] = useState<GameState>({ score: 0, misses: 0, combo: 1, consecutiveHits: 0, ghostUsed: false });
+    const [p2State, setP2State] = useState<GameState>({ score: 0, misses: 0, combo: 1, consecutiveHits: 0, ghostUsed: false });
     
     const [circles, setCircles] = useState<Circle[]>([]);
     const [isPaused, setIsPaused] = useState(false);
@@ -96,6 +97,11 @@ export function GameScreen({ onGameOver, circleStyle, gameMode, difficulty }: Ga
     const settings = DIFFICULTY_SETTINGS[difficulty];
     const maxMisses = gameMode === 'survival' ? 1 : 3;
 
+    // Power-up logic
+    const hasRingEquipped = activeItemId === 'style_ring';
+    const hasGhostEquipped = activeItemId === 'style_ghost';
+    const circleDiameter = hasRingEquipped ? BASE_CIRCLE_DIAMETER * 1.2 : BASE_CIRCLE_DIAMETER;
+
     const resetCombo = (player?: 1 | 2) => {
         if (gameMode === 'duo') {
             const setState = player === 1 ? setP1State : setP2State;
@@ -109,7 +115,7 @@ export function GameScreen({ onGameOver, circleStyle, gameMode, difficulty }: Ga
         const yOffset = gameMode === 'duo' && circle.player === 2 ? (p2GameAreaRef.current?.offsetTop || 0) : 0;
         setFloatingScores(prev => [...prev, {
             id: Date.now(),
-            x: circle.x + CIRCLE_DIAMETER / 2,
+            x: circle.x + circleDiameter / 2,
             y: circle.y + yOffset,
             points: `+${points}`,
             color: "text-primary"
@@ -120,11 +126,22 @@ export function GameScreen({ onGameOver, circleStyle, gameMode, difficulty }: Ga
     const handleMiss = (missAmount = 1, player?: 1 | 2) => {
         if(isPaused) return;
         playSfx(SFX.miss);
+
+        const applyMiss = (state: GameState, setState: React.Dispatch<React.SetStateAction<GameState>>) => {
+            if (hasGhostEquipped && !state.ghostUsed) {
+                setState(s => ({...s, ghostUsed: true }));
+                // Don't count the miss, just reset combo
+            } else {
+                setState(s => ({...s, misses: s.misses + missAmount}));
+            }
+        };
+
         if (gameMode === 'duo') {
             const setState = player === 1 ? setP1State : setP2State;
-            setState(s => ({...s, misses: s.misses + missAmount}));
+            const state = player === 1 ? p1State : p2State;
+            applyMiss(state, setState);
         } else {
-            setGameState(s => ({ ...s, misses: s.misses + missAmount }));
+            applyMiss(gameState, setGameState);
         }
         resetCombo(player);
     }
@@ -151,7 +168,7 @@ export function GameScreen({ onGameOver, circleStyle, gameMode, difficulty }: Ga
         
         if (gameMode === 'precision') {
             if (circle.type.type !== 'precision_target') {
-                handleMiss();
+                handleMiss(1);
                 setCircles(prev => prev.filter(c => c.id !== id));
                 return;
             }
@@ -228,8 +245,7 @@ export function GameScreen({ onGameOver, circleStyle, gameMode, difficulty }: Ga
                 if (p1Missed > 0) handleMiss(p1Missed, 1);
                 if (p2Missed > 0) handleMiss(p2Missed, 2);
             } else if (singleMissed > 0) {
-                setGameState(s => ({...s, misses: s.misses + singleMissed}));
-                resetCombo();
+                handleMiss(singleMissed);
             }
             
             setCircles(updatedCircles);
@@ -248,8 +264,8 @@ export function GameScreen({ onGameOver, circleStyle, gameMode, difficulty }: Ga
                     
                     const baseCircle = {
                         id: Date.now() + Math.random(),
-                        x: Math.random() * (width - CIRCLE_DIAMETER),
-                        y: Math.random() * (height - CIRCLE_DIAMETER - topOffset) + topOffset,
+                        x: Math.random() * (width - circleDiameter),
+                        y: Math.random() * (height - circleDiameter - topOffset) + topOffset,
                         createdAt: Date.now(),
                         player: player,
                     };
@@ -284,7 +300,7 @@ export function GameScreen({ onGameOver, circleStyle, gameMode, difficulty }: Ga
             }
         }
         animationFrameId.current = requestAnimationFrame(gameLoop);
-    }, [isPaused, circles, maxMisses, difficulty, gameMode]);
+    }, [isPaused, circles, maxMisses, difficulty, gameMode, circleDiameter, hasGhostEquipped]);
 
     useEffect(() => {
         animationFrameId.current = requestAnimationFrame(gameLoop);
@@ -307,20 +323,25 @@ export function GameScreen({ onGameOver, circleStyle, gameMode, difficulty }: Ga
         }
     }, [gameState, p1State, p2State, onGameOver, maxMisses, gameMode]);
     
-    const renderLives = (misses: number) => {
+    const renderLives = (misses: number, ghostUsed: boolean) => {
+      const livesLeft = maxMisses - misses;
+      const ghostAvailable = hasGhostEquipped && !ghostUsed;
+
       if (gameMode === 'survival' || gameMode === 'duo') {
         return (
           <div className="flex items-center gap-2 text-xl font-bold text-destructive">
             <Shield />
-            <span>{maxMisses - misses}/{maxMisses}</span>
+            <span>{livesLeft}/{maxMisses}</span>
+            {ghostAvailable && <div className="w-2 h-6 bg-accent rounded-full animate-pulse"></div>}
           </div>
         )
       }
       return (
         <div className="flex items-center gap-1">
           {Array.from({ length: maxMisses }).map((_, i) => (
-            <Heart key={i} className={`h-6 w-6 ${i < maxMisses - misses ? 'text-red-500 fill-current' : 'text-muted-foreground'}`} />
+            <Heart key={i} className={`h-6 w-6 ${i < livesLeft ? 'text-red-500 fill-current' : 'text-muted-foreground'}`} />
           ))}
+          {ghostAvailable && <div className="w-2 h-6 bg-accent rounded-full animate-pulse ml-1"></div>}
         </div>
       )
     }
@@ -344,7 +365,7 @@ export function GameScreen({ onGameOver, circleStyle, gameMode, difficulty }: Ga
                   )}
                 </div>
                 
-                {renderLives(currentState.misses)}
+                {renderLives(currentState.misses, currentState.ghostUsed)}
 
                 {!isDuo &&
                     <Button variant="ghost" size="icon" onClick={() => setIsPaused(!isPaused)}>
@@ -356,19 +377,22 @@ export function GameScreen({ onGameOver, circleStyle, gameMode, difficulty }: Ga
     }
 
     const renderCircles = (player?: 1 | 2) => {
+        const activeItem = SHOP_ITEMS.find(i => i.id === activeItemId);
+        const itemClassName = activeItem?.className || 'bg-primary rounded-full';
+
         return circles.filter(c => c.player === player).map(circle => {
             const Icon = circle.type.icon;
-            const finalCircleStyle = circle.type.type === 'default' ? circleStyle : circle.type.color;
+            const finalCircleStyle = circle.type.type === 'default' ? itemClassName : circle.type.color;
             
             return (
               <div
                 key={circle.id}
-                className={`absolute cursor-pointer animate-scale-in transition-all duration-200 hover:scale-110 active:scale-95 rounded-full flex items-center justify-center text-white font-bold text-sm ${Icon ? circle.type.color : finalCircleStyle}`}
+                className={cn(`absolute cursor-pointer animate-scale-in transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center text-white font-bold text-sm`, Icon ? circle.type.color : finalCircleStyle)}
                 style={{
                   left: circle.x,
                   top: circle.y,
-                  width: CIRCLE_DIAMETER,
-                  height: CIRCLE_DIAMETER,
+                  width: circleDiameter,
+                  height: circleDiameter,
                 }}
                 onClick={(e) => handleCircleClick(e, circle.id)}
               >

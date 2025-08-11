@@ -36,7 +36,10 @@ export interface Translation {
     equipped: string;
   };
   shopItems: {
-    [key: string]: string;
+    [key: string]: {
+      name: string;
+      description: string;
+    };
   };
   modes: {
       title: string;
@@ -122,14 +125,14 @@ const en: Translation = {
     equipped: "Equipped",
   },
   shopItems: {
-    style_default: "Vibrant Purple",
-    style_electric: "Electric Blue",
-    style_sunburst: "Sunburst Orange",
-    style_forest: "Forest Green",
-    style_golden: "Goldenrod",
-    style_square: "The Square",
-    style_ring: "The Ring",
-    style_ghost: "Ghost",
+    style_default: { name: "Vibrant Purple", description: "The classic look. No special effects." },
+    style_electric: { name: "Electric Blue", description: "A cool, energetic style for your taps." },
+    style_sunburst: { name: "Sunburst Orange", description: "A warm, radiant style." },
+    style_forest: { name: "Forest Green", description: "A calm, natural look." },
+    style_golden: { name: "Goldenrod", description: "Show off your premium style." },
+    style_square: { name: "The Square", description: "Who said circles are the only way?" },
+    style_ring: { name: "The Ring", description: "Circles are 20% larger, making them easier to hit." },
+    style_ghost: { name: "Ghost", description: "Your first miss in a game doesn't count. A freebie!" },
   },
   modes: {
       title: "Select Mode",
@@ -215,14 +218,14 @@ const es: Translation = {
     equipped: "Equipado",
   },
   shopItems: {
-    style_default: "Púrpura Vibrante",
-    style_electric: "Azul Eléctrico",
-    style_sunburst: "Naranja Solar",
-    style_forest: "Verde Bosque",
-    style_golden: "Vara de Oro",
-    style_square: "El Cuadrado",
-    style_ring: "El Anillo",
-    style_ghost: "Fantasma",
+    style_default: { name: "Púrpura Vibrante", description: "El estilo clásico. Sin efectos especiales." },
+    style_electric: { name: "Azul Eléctrico", description: "Un estilo fresco y enérgico para tus toques." },
+    style_sunburst: { name: "Naranja Solar", description: "Un estilo cálido y radiante." },
+    style_forest: { name: "Verde Bosque", description: "Una apariencia tranquila y natural." },
+    style_golden: { name: "Vara de Oro", description: "Demuestra tu estilo prémium." },
+    style_square: { name: "El Cuadrado", description: "¿Quién dijo que los círculos son la única forma?" },
+    style_ring: { name: "El Anillo", description: "Los círculos son un 20% más grandes, más fáciles de acertar." },
+    style_ghost: { name: "Fantasma", description: "Tu primer fallo en una partida no cuenta. ¡Uno de regalo!" },
   },
   modes: {
       title: "Elige un Modo",

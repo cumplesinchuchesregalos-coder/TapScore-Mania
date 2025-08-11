@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, Check, Lock, Gem } from "lucide-react";
 import { SHOP_ITEMS, type ShopItem } from "@/lib/shop-items";
@@ -42,10 +42,11 @@ export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, on
                 
                 return (
                 <Card key={item.id} className="flex flex-col text-center shadow-md transition-transform hover:scale-105">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base">{t.shopItems[item.id] || item.name}</CardTitle>
+                    <CardHeader className="pb-2 flex-grow">
+                      <CardTitle className="text-base">{t.shopItems[item.id]?.name || item.name}</CardTitle>
+                      <CardDescription className="text-xs">{t.shopItems[item.id]?.description || ''}</CardDescription>
                     </CardHeader>
-                    <CardContent className="flex-1 flex items-center justify-center p-4">
+                    <CardContent className="flex items-center justify-center p-4">
                       <div className={`w-16 h-16 transition-all duration-300 ${item.className} ${isActive ? 'ring-4 ring-offset-2 ring-primary' : ''}`}></div>
                     </CardContent>
                     <CardFooter className="p-2">
