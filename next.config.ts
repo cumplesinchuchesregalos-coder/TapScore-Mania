@@ -10,7 +10,6 @@ const nextConfig: NextConfig = {
   },
   images: {
     // Allow 'data:' URLs for the generated images from AI
-    unoptimized: true,
   },
 };
 
