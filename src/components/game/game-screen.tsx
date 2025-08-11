@@ -27,9 +27,10 @@ const DIFFICULTY_SETTINGS = {
 };
 
 const CIRCLE_TYPES = [
-    { type: 'default', color: 'bg-primary', points: 1, lifespan: 2500, probability: 0.5 },
+    { type: 'default', color: 'bg-primary', points: 1, lifespan: 2500, probability: 0.4 },
     { type: 'fast', color: 'bg-accent', points: 2, lifespan: 1500, probability: 0.3 },
-    { type: 'very_fast', color: 'bg-chart-2', points: 3, lifespan: 1000, probability: 0.15 },
+    { type: 'sunburst', color: 'bg-chart-1', points: 3, lifespan: 1200, probability: 0.15 },
+    { type: 'forest', color: 'bg-chart-2', points: 4, lifespan: 1000, probability: 0.1 },
     { type: 'rare', color: 'bg-chart-4', points: 10, lifespan: 800, probability: 0.05, icon: Gem },
 ];
 
@@ -303,10 +304,12 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
 
           {circles.map(circle => {
             const Icon = circle.type.icon;
+            const finalCircleStyle = circle.type.type === 'default' ? circleStyle : circle.type.color;
+            
             return (
               <div
                 key={circle.id}
-                className={`absolute cursor-pointer animate-scale-in transition-all duration-200 hover:scale-110 active:scale-95 rounded-full flex items-center justify-center text-white font-bold text-sm ${circle.type.color}`}
+                className={`absolute cursor-pointer animate-scale-in transition-all duration-200 hover:scale-110 active:scale-95 rounded-full flex items-center justify-center text-white font-bold text-sm ${Icon ? circle.type.color : finalCircleStyle}`}
                 style={{
                   left: circle.x,
                   top: circle.y,
@@ -315,7 +318,7 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
                 }}
                 onClick={(e) => handleCircleClick(e, circle.id)}
               >
-                {Icon ? <Icon className="h-8 w-8" /> : `+${circle.type.points}`}
+                {Icon ? <Icon className="h-8 w-8" /> : (circle.type.points > 0 ? `+${circle.type.points}`: '')}
               </div>
             )
           })}
