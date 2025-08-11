@@ -383,12 +383,13 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
         return circles.filter(c => c.player === player).map(circle => {
             const Icon = circle.type.icon;
             
-            const useImageForDefault = circle.type.type === 'default' && activeItem?.imageUrl;
+            const isDefaultType = circle.type.type === 'default';
+            const useImageForDefault = isDefaultType && activeItem?.imageUrl;
             
             let finalCircleStyle = '';
             if (useImageForDefault) {
                 finalCircleStyle = 'bg-transparent';
-            } else if (circle.type.type === 'default') {
+            } else if (isDefaultType) {
                 finalCircleStyle = activeItem?.className || 'bg-primary rounded-full';
             } else {
                 finalCircleStyle = circle.type.color;
@@ -397,7 +398,7 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
             return (
               <div
                 key={circle.id}
-                className={cn(`absolute cursor-pointer animate-scale-in transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center text-white font-bold text-sm`, Icon ? circle.type.color : finalCircleStyle)}
+                className={cn(`absolute cursor-pointer animate-scale-in transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center text-white font-bold text-sm`, finalCircleStyle, Icon && !useImageForDefault ? '' : 'rounded-full')}
                 style={{
                   left: circle.x,
                   top: circle.y,
