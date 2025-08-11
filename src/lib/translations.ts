@@ -49,6 +49,11 @@ export interface Translation {
           description: string;
       },
       comingSoon: string;
+      difficulty: {
+        easy: string;
+        normal: string;
+        hard: string;
+      }
   }
 }
 
@@ -108,7 +113,12 @@ const en: Translation = {
           title: "Bomb Squad",
           description: "Avoid the bombs at all cost!"
       },
-      comingSoon: "Coming Soon"
+      comingSoon: "Coming Soon",
+      difficulty: {
+        easy: "Easy",
+        normal: "Normal",
+        hard: "Hard"
+      }
   }
 };
 
@@ -168,7 +178,12 @@ const es: Translation = {
           title: "Antiexplosivos",
           description: "¡Evita las bombas a toda costa!"
       },
-      comingSoon: "Próximamente"
+      comingSoon: "Próximamente",
+      difficulty: {
+        easy: "Fácil",
+        normal: "Normal",
+        hard: "Difícil"
+      }
   }
 };
 

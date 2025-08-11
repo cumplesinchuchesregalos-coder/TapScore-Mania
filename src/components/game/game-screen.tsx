@@ -5,11 +5,27 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Pause, Play, XOctagon, Heart, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/language-context';
-import type { GameMode } from '@/app/page';
+import type { GameMode, Difficulty } from '@/app/page';
 
 const CIRCLE_DIAMETER = 60;
-const CIRCLE_LIFESPAN = 3000;
-const INITIAL_SPAWN_RATE = 1500;
+
+const DIFFICULTY_SETTINGS = {
+  easy: {
+    lifespan: 3500,
+    initialSpawn: 2000,
+    rateDecrement: 15,
+  },
+  normal: {
+    lifespan: 3000,
+    initialSpawn: 1500,
+    rateDecrement: 25,
+  },
+  hard: {
+    lifespan: 2500,
+    initialSpawn: 1000,
+    rateDecrement: 35,
+  },
+};
 
 interface Circle {
   id: number;
@@ -23,9 +39,10 @@ interface GameScreenProps {
   onGameOver: (finalScore: number) => void;
   circleStyle: string;
   gameMode: GameMode;
+  difficulty: Difficulty;
 }
 
-export function GameScreen({ setScore, onGameOver, circleStyle, gameMode }: GameScreenProps) {
+export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, difficulty }: GameScreenProps) {
     const { t } = useLanguage();
     const [internalScore, setInternalScore] = useState(0);
     const [circles, setCircles] = useState<Circle[]>([]);
@@ -35,7 +52,10 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode }: Game
     const gameAreaRef = useRef<HTMLDivElement>(null);
     const animationFrameId = useRef<number>();
     const lastSpawnTime = useRef<number>(Date.now());
-    const spawnRate = useRef(INITIAL_SPAWN_RATE);
+    const spawnRate = useRef(DIFFICULTY_SETTINGS[difficulty].initialSpawn);
+
+    const settings = DIFFICULTY_SETTINGS[difficulty];
+    const circleLifespan = settings.lifespan;
     
     const maxMisses = gameMode === 'survival' ? 1 : 3;
 
@@ -48,7 +68,11 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode }: Game
         setInternalScore(newScore);
         setScore(newScore);
 
-        const rateDecrement = gameMode === 'survival' ? 40 : 25;
+        let rateDecrement = settings.rateDecrement;
+        if (gameMode === 'survival') {
+          rateDecrement *= 1.5;
+        }
+
         spawnRate.current = Math.max(300, spawnRate.current - rateDecrement);
     };
 
@@ -63,7 +87,7 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode }: Game
         if (!isPaused) {
             let missedCount = 0;
             const updatedCircles = circles.filter(circle => {
-                if (now - circle.createdAt > CIRCLE_LIFESPAN) {
+                if (now - circle.createdAt > circleLifespan) {
                     missedCount++;
                     return false;
                 }
@@ -88,7 +112,7 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode }: Game
             }
         }
         animationFrameId.current = requestAnimationFrame(gameLoop);
-    }, [isPaused, circles, maxMisses]);
+    }, [isPaused, circles, maxMisses, circleLifespan]);
 
     useEffect(() => {
         animationFrameId.current = requestAnimationFrame(gameLoop);

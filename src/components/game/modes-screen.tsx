@@ -1,19 +1,21 @@
 
 "use client";
 
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { ArrowLeft, Gamepad2, Shield, Target, Bomb, Lock } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
-import type { GameMode } from "@/app/page";
+import type { GameMode, Difficulty } from "@/app/page";
 
 interface ModesScreenProps {
   onBack: () => void;
-  onSelectMode: (mode: GameMode) => void;
+  onSelectMode: (mode: GameMode, difficulty: Difficulty) => void;
 }
 
 export function ModesScreen({ onBack, onSelectMode }: ModesScreenProps) {
   const { t } = useLanguage();
+  const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
 
   const modes = [
     { id: 'classic', icon: Gamepad2, title: t.modes.classic.title, description: t.modes.classic.description, enabled: true },
@@ -21,6 +23,18 @@ export function ModesScreen({ onBack, onSelectMode }: ModesScreenProps) {
     { id: 'precision', icon: Target, title: t.modes.precision.title, description: t.modes.precision.description, enabled: false },
     { id: 'bomb', icon: Bomb, title: t.modes.bomb.title, description: t.modes.bomb.description, enabled: false },
   ];
+
+  const difficulties: {id: Difficulty, label: string}[] = [
+      { id: 'easy', label: t.modes.difficulty.easy },
+      { id: 'normal', label: t.modes.difficulty.normal },
+      { id: 'hard', label: t.modes.difficulty.hard },
+  ]
+
+  const handleModeClick = (mode: GameMode) => {
+    if (modes.find(m => m.id === mode)?.enabled) {
+      setSelectedMode(current => current === mode ? null : mode);
+    }
+  }
 
   return (
     <div className="flex flex-col h-full bg-card animate-scale-in">
@@ -38,8 +52,8 @@ export function ModesScreen({ onBack, onSelectMode }: ModesScreenProps) {
             return (
               <Card 
                 key={mode.id} 
-                className={`transition-all ${mode.enabled ? 'cursor-pointer hover:border-primary hover:shadow-lg' : 'opacity-60 bg-muted'}`}
-                onClick={() => mode.enabled && onSelectMode(mode.id as GameMode)}
+                className={`transition-all ${mode.enabled ? 'cursor-pointer hover:border-primary' : 'opacity-60 bg-muted'}`}
+                onClick={() => handleModeClick(mode.id as GameMode)}
               >
                 <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
                     <div className="bg-primary/10 p-3 rounded-full">
@@ -51,6 +65,22 @@ export function ModesScreen({ onBack, onSelectMode }: ModesScreenProps) {
                     </div>
                     {!mode.enabled && <Lock className="w-5 h-5 text-muted-foreground" />}
                 </CardHeader>
+                {selectedMode === mode.id && mode.enabled && (
+                    <CardFooter className="flex justify-around bg-muted/50 p-2">
+                        {difficulties.map(d => (
+                            <Button 
+                                key={d.id}
+                                variant="secondary"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onSelectMode(mode.id as GameMode, d.id)
+                                }}
+                            >
+                                {d.label}
+                            </Button>
+                        ))}
+                    </CardFooter>
+                )}
               </Card>
             );
           })}

@@ -13,11 +13,13 @@ import { Zap } from "lucide-react";
 import { LanguageProvider } from "@/context/language-context";
 
 export type GameMode = "classic" | "survival" | "precision" | "bomb" | "duo";
+export type Difficulty = "easy" | "normal" | "hard";
 type GameState = "home" | "game" | "game-over" | "shop" | "modes";
 
 export default function Home() {
   const [gameState, setGameState] = useState<GameState>("home");
   const [gameMode, setGameMode] = useState<GameMode>("classic");
+  const [difficulty, setDifficulty] = useState<Difficulty>("normal");
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [currency, setCurrency] = useState(0);
@@ -46,9 +48,10 @@ export default function Home() {
     setHydrated(true);
   }, []);
 
-  const handleStartGame = (mode: GameMode) => {
+  const handleStartGame = (mode: GameMode, difficulty: Difficulty) => {
     setScore(0);
     setGameMode(mode);
+    setDifficulty(difficulty);
     setGameState("game");
   };
 
@@ -92,9 +95,9 @@ export default function Home() {
   const renderGameState = () => {
     switch (gameState) {
       case "game":
-        return <GameScreen setScore={setScore} onGameOver={handleGameOver} circleStyle={activeItemStyle} gameMode={gameMode} />;
+        return <GameScreen setScore={setScore} onGameOver={handleGameOver} circleStyle={activeItemStyle} gameMode={gameMode} difficulty={difficulty} />;
       case "game-over":
-        return <GameOverScreen score={score} highScore={highScore} onRestart={() => handleStartGame(gameMode)} onHome={() => setGameState("home")} />;
+        return <GameOverScreen score={score} highScore={highScore} onRestart={() => handleStartGame(gameMode, difficulty)} onHome={() => setGameState("home")} />;
       case "shop":
         return <ShopScreen 
                   currency={currency} 
