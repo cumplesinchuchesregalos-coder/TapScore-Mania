@@ -7,8 +7,8 @@ import { GameScreen } from "@/components/game/game-screen";
 import { GameOverScreen } from "@/components/game/game-over-screen";
 import { ShopScreen } from "@/components/game/shop-screen";
 import { ModesScreen } from "@/components/game/modes-screen";
+import { SettingsScreen } from "@/components/game/settings-screen";
 import { SHOP_ITEMS, type ShopItem } from "@/lib/shop-items";
-import { Button } from "@/components/ui/button";
 import { Zap } from "lucide-react";
 import { LanguageProvider } from "@/context/language-context";
 import { AudioProvider } from "@/context/audio-context";
@@ -16,7 +16,7 @@ import AudioController from "@/components/game/audio-controller";
 
 export type GameMode = "classic" | "survival" | "precision" | "bomb" | "duo";
 export type Difficulty = "easy" | "normal" | "hard";
-type GameState = "home" | "game" | "game-over" | "shop" | "modes";
+type GameState = "home" | "game" | "game-over" | "shop" | "modes" | "settings";
 
 export default function Home() {
   const [gameState, setGameState] = useState<GameState>("home");
@@ -111,6 +111,8 @@ export default function Home() {
                 />;
       case "modes":
         return <ModesScreen onBack={() => setGameState("home")} onSelectMode={handleStartGame} />;
+      case "settings":
+        return <SettingsScreen onBack={() => setGameState("home")} />;
       case "home":
       default:
         return <HomeScreen onNavigate={handleNavigate} highScore={highScore} />;

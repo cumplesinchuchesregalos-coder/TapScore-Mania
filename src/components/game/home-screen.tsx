@@ -2,20 +2,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Trophy, ShoppingCart, Settings, Gamepad2, Volume2, VolumeX } from "lucide-react";
+import { Trophy, ShoppingCart, Settings, Gamepad2 } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
-import { useAudio } from "@/context/audio-context";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Globe } from "lucide-react";
 
 interface HomeScreenProps {
-  onNavigate: (target: "shop" | "modes") => void;
+  onNavigate: (target: "shop" | "modes" | "settings") => void;
   highScore: number;
 }
 
@@ -35,15 +26,7 @@ const TappingIcon = () => (
 );
 
 export function HomeScreen({ onNavigate, highScore }: HomeScreenProps) {
-  const { t, language, setLanguage } = useLanguage();
-  const { isMuted, toggleMute } = useAudio();
-
-  const handleLanguageChange = (value: string) => {
-    const lang = value as 'en' | 'es';
-    if (lang) {
-      setLanguage(lang);
-    }
-  };
+  const { t } = useLanguage();
   
   return (
     <div className="flex flex-col items-center justify-between h-full p-8 bg-card text-center relative overflow-hidden">
@@ -52,24 +35,9 @@ export function HomeScreen({ onNavigate, highScore }: HomeScreenProps) {
           <Trophy className="w-6 h-6 text-yellow-500" />
           <span>{highScore}</span>
         </div>
-        <div className="flex gap-2">
-            <Select value={language} onValueChange={handleLanguageChange}>
-              <SelectTrigger className="w-auto gap-2 bg-muted/50 rounded-full shadow-inner border-0">
-                  <Globe className="w-5 h-5" />
-                  <SelectValue placeholder="Language" />
-              </SelectTrigger>
-              <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="es">Español</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="ghost" size="icon" onClick={toggleMute} className="rounded-full">
-              {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
-            </Button>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Settings className="w-6 h-6" />
-            </Button>
-        </div>
+        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onNavigate("settings")}>
+          <Settings className="w-6 h-6" />
+        </Button>
       </div>
 
       <div className="flex flex-col items-center">

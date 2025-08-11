@@ -54,6 +54,17 @@ export interface Translation {
         normal: string;
         hard: string;
       }
+  },
+  settings: {
+      title: string;
+      audio: {
+          title: string;
+          sound: string;
+      },
+      language: {
+          title: string;
+          language: string;
+      }
   }
 }
 
@@ -119,6 +130,17 @@ const en: Translation = {
         normal: "Normal",
         hard: "Hard"
       }
+  },
+  settings: {
+      title: "Settings",
+      audio: {
+          title: "Audio",
+          sound: "Sound"
+      },
+      language: {
+          title: "Language",
+          language: "Language"
+      }
   }
 };
 
@@ -183,6 +205,17 @@ const es: Translation = {
         easy: "Fácil",
         normal: "Normal",
         hard: "Difícil"
+      }
+  },
+  settings: {
+      title: "Ajustes",
+      audio: {
+          title: "Audio",
+          sound: "Sonido"
+      },
+      language: {
+          title: "Idioma",
+          language: "Idioma"
       }
   }
 };
