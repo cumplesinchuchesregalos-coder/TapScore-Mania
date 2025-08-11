@@ -49,7 +49,7 @@ export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, on
                       <CardDescription className="text-xs h-10">{t.shopItems[item.id]?.description || ''}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex items-center justify-center p-4 flex-grow">
-                      <div className={cn('w-16 h-16 transition-all duration-300 flex items-center justify-center', item.className, isActive ? 'ring-4 ring-offset-2 ring-primary' : '')}>
+                      <div className={cn('w-16 h-16 transition-all duration-300 flex items-center justify-center', isActive ? 'ring-4 ring-offset-2 ring-primary' : '', !item.imageUrl && item.className)}>
                         {item.imageUrl ? (
                           <Image 
                             src={item.imageUrl} 
