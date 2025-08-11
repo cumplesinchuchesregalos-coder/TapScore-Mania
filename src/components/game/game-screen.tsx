@@ -390,7 +390,7 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
                 // Special circles with icons (Bomb, Target, Gem)
                 circleContent = (
                     <div className={cn('w-full h-full flex items-center justify-center rounded-full', circle.type.color)}>
-                        <Icon className="h-8 w-8" />
+                        <Icon className="h-8 w-8 text-white" />
                     </div>
                 );
             } else if (activeItem?.imageUrl) {
@@ -407,7 +407,7 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
                 );
             } else {
                 // Regular colored circle (either from active item or circle type)
-                const colorClass = circle.type.type === 'default' ? activeItem?.className : circle.type.color;
+                const colorClass = circle.type.type === 'default' && activeItem?.className ? activeItem.className : circle.type.color;
                 circleContent = (
                     <div className={cn('w-full h-full flex items-center justify-center rounded-full text-white font-bold text-sm', colorClass)}>
                          {circle.type.points > 0 ? `+${circle.type.points}` : ''}

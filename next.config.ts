@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
   },
   images: {
     // Allow 'data:' URLs for the generated images from AI
+    remotePatterns: [
+      {
+        protocol: 'data',
+        hostname: '**',
+      },
+    ],
   },
 };
 
