@@ -9,10 +9,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Globe, Volume2, VolumeX } from "lucide-react";
+import { ArrowLeft, Globe, Volume2, VolumeX, Music, Check } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { useAudio } from "@/context/audio-context";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 
 interface SettingsScreenProps {
   onBack: () => void;
@@ -20,7 +22,14 @@ interface SettingsScreenProps {
 
 export function SettingsScreen({ onBack }: SettingsScreenProps) {
   const { t, language, setLanguage } = useLanguage();
-  const { isMuted, toggleMute } = useAudio();
+  const { 
+    isMuted, 
+    toggleMute, 
+    musicVolume, 
+    setMusicVolume, 
+    sfxVolume, 
+    setSfxVolume 
+  } = useAudio();
 
   const handleLanguageChange = (value: string) => {
     const lang = value as 'en' | 'es';
@@ -41,11 +50,36 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
       <div className="flex-1 p-6 space-y-8">
         <div className="space-y-4">
             <h3 className="text-lg font-semibold text-muted-foreground">{t.settings.audio.title}</h3>
-            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                <Label htmlFor="mute-button" className="text-lg">{t.settings.audio.sound}</Label>
-                <Button id="mute-button" variant="outline" size="icon" onClick={toggleMute}>
-                  {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
-                </Button>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+                  <Label htmlFor="mute-button" className="text-lg flex items-center gap-2">
+                    {isMuted ? <VolumeX/> : <Volume2/>} 
+                    {t.settings.audio.sound}
+                  </Label>
+                  <Switch id="mute-button" checked={!isMuted} onCheckedChange={toggleMute} />
+              </div>
+              <div className="p-4 rounded-lg bg-muted/50 space-y-4">
+                <Label htmlFor="music-volume" className="text-lg flex items-center gap-2"><Music /> {t.settings.audio.music}</Label>
+                <Slider 
+                  id="music-volume"
+                  value={[musicVolume]} 
+                  onValueChange={(value) => setMusicVolume(value[0])}
+                  max={1} 
+                  step={0.1}
+                  disabled={isMuted}
+                />
+              </div>
+              <div className="p-4 rounded-lg bg-muted/50 space-y-4">
+                <Label htmlFor="sfx-volume" className="text-lg flex items-center gap-2"><Volume2/> {t.settings.audio.sfx}</Label>
+                <Slider 
+                  id="sfx-volume"
+                  value={[sfxVolume]} 
+                  onValueChange={(value) => setSfxVolume(value[0])}
+                  max={1} 
+                  step={0.1}
+                  disabled={isMuted}
+                />
+              </div>
             </div>
         </div>
         <div className="space-y-4">

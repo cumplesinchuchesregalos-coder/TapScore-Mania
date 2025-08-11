@@ -75,6 +75,8 @@ export interface Translation {
       audio: {
           title: string;
           sound: string;
+          music: string;
+          sfx: string;
       },
       language: {
           title: string;
@@ -165,7 +167,9 @@ const en: Translation = {
       title: "Settings",
       audio: {
           title: "Audio",
-          sound: "Sound"
+          sound: "Sound",
+          music: "Music",
+          sfx: "SFX"
       },
       language: {
           title: "Language",
@@ -256,7 +260,9 @@ const es: Translation = {
       title: "Ajustes",
       audio: {
           title: "Audio",
-          sound: "Sonido"
+          sound: "Sonido",
+          music: "Música",
+          sfx: "Efectos"
       },
       language: {
           title: "Idioma",

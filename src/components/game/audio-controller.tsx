@@ -7,7 +7,7 @@ import { useAudio } from '@/context/audio-context';
 const BACKGROUND_MUSIC_SRC = "/audio/01-2017987-Retro Frank-Aliens.mp3";
 
 const AudioController = () => {
-  const { isMuted } = useAudio();
+  const { isMuted, musicVolume } = useAudio();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasStarted = useRef(false);
 
@@ -20,12 +20,13 @@ const AudioController = () => {
     }
   }, []);
 
-  // Control mute state
+  // Control mute state and volume
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.muted = isMuted;
+      audioRef.current.volume = musicVolume;
     }
-  }, [isMuted]);
+  }, [isMuted, musicVolume]);
   
   // Try to play on first user interaction
   useEffect(() => {
