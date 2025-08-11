@@ -53,7 +53,7 @@ export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, on
                         {item.imageUrl ? (
                           <Image 
                             src={item.imageUrl} 
-                            alt={item.name}
+                            alt={t.shopItems[item.id]?.name || item.name}
                             width={64}
                             height={64}
                             data-ai-hint={item.imageHint}
