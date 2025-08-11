@@ -1,7 +1,7 @@
 
 "use client";
 
-import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
 
 interface AudioContextType {
   isMuted: boolean;
@@ -11,20 +11,28 @@ interface AudioContextType {
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
+const MAX_AUDIO_PLAYERS = 10;
+
 export const AudioProvider = ({ children }: { children: ReactNode }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [hydrated, setHydrated] = useState(false);
-  const [sfx, setSfx] = useState<HTMLAudioElement | null>(null);
+  const audioPlayers = useRef<HTMLAudioElement[]>([]);
+  const currentPlayerIndex = useRef(0);
 
   useEffect(() => {
     const storedMute = localStorage.getItem('tapscore_isMuted');
     if (storedMute) {
       setIsMuted(JSON.parse(storedMute));
     }
-    setSfx(new Audio());
+    
+    // Initialize a pool of audio players
+    for (let i = 0; i < MAX_AUDIO_PLAYERS; i++) {
+        audioPlayers.current.push(new Audio());
+    }
+
     setHydrated(true);
   }, []);
-
+  
   const toggleMute = useCallback(() => {
     setIsMuted(current => {
       const newState = !current;
@@ -34,11 +42,14 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const playSfx = useCallback((sfxUrl: string) => {
-    if (!isMuted && sfx) {
-      sfx.src = sfxUrl;
-      sfx.play().catch(e => console.error("Error playing SFX:", e));
+    if (!isMuted && audioPlayers.current.length > 0) {
+        const player = audioPlayers.current[currentPlayerIndex.current];
+        player.src = sfxUrl;
+        player.play().catch(e => console.error("Error playing SFX:", e));
+
+        currentPlayerIndex.current = (currentPlayerIndex.current + 1) % MAX_AUDIO_PLAYERS;
     }
-  }, [isMuted, sfx]);
+  }, [isMuted]);
   
   const value = { isMuted, toggleMute, playSfx };
 

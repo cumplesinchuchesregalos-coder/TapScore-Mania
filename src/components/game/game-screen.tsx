@@ -5,7 +5,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Pause, Play, Heart, Shield, Gem, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/language-context';
+import { useAudio } from '@/context/audio-context';
 import type { GameMode, Difficulty } from '@/app/page';
+import { SFX } from '@/lib/sfx';
 
 const CIRCLE_DIAMETER = 60;
 
@@ -56,6 +58,7 @@ interface GameScreenProps {
 
 export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, difficulty }: GameScreenProps) {
     const { t } = useLanguage();
+    const { playSfx } = useAudio();
     const [internalScore, setInternalScore] = useState(0);
     const [circles, setCircles] = useState<Circle[]>([]);
     const [misses, setMisses] = useState(0);
@@ -84,6 +87,8 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
         const circle = circles.find(c => c.id === id);
         if (!circle) return;
 
+        playSfx(SFX.tap);
+
         const pointsGained = circle.type.points * combo;
         const newScore = internalScore + pointsGained;
 
@@ -107,7 +112,11 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
         setConsecutiveHits(newHits);
 
         if (newHits > 0 && newHits % 5 === 0) {
-            setCombo(prev => prev + 1);
+            setCombo(prev => {
+                const newCombo = prev + 1;
+                playSfx(SFX.combo);
+                return newCombo;
+            });
         }
 
         let rateDecrement = settings.rateDecrement;
