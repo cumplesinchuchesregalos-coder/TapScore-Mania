@@ -17,6 +17,8 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    // Allow 'data:' URLs for the generated images from AI
+    unoptimized: true,
   },
 };
 
