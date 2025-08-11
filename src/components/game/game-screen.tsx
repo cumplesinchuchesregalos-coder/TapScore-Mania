@@ -39,10 +39,17 @@ interface Circle {
   type: typeof CIRCLE_TYPES[number];
 }
 
+interface FloatingScore {
+    id: number;
+    x: number;
+    y: number;
+    points: number;
+}
+
 interface GameScreenProps {
   setScore: React.Dispatch<React.SetStateAction<number>>;
   onGameOver: (finalScore: number) => void;
-  circleStyle: string; // This is now a base style, but we'll use circle types
+  circleStyle: string;
   gameMode: GameMode;
   difficulty: Difficulty;
 }
@@ -55,6 +62,7 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
     const [isPaused, setIsPaused] = useState(false);
     const [combo, setCombo] = useState(1);
     const [consecutiveHits, setConsecutiveHits] = useState(0);
+    const [floatingScores, setFloatingScores] = useState<FloatingScore[]>([]);
 
     const gameAreaRef = useRef<HTMLDivElement>(null);
     const animationFrameId = useRef<number>();
@@ -76,6 +84,23 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
         const circle = circles.find(c => c.id === id);
         if (!circle) return;
 
+        const pointsGained = circle.type.points * combo;
+        const newScore = internalScore + pointsGained;
+
+        setInternalScore(newScore);
+        setScore(newScore);
+
+        setFloatingScores(prev => [...prev, {
+            id: Date.now(),
+            x: circle.x + CIRCLE_DIAMETER / 2,
+            y: circle.y,
+            points: pointsGained,
+        }]);
+
+        setTimeout(() => {
+            setFloatingScores(currentScores => currentScores.slice(1));
+        }, 1000);
+
         setCircles(prev => prev.filter(c => c.id !== id));
         
         const newHits = consecutiveHits + 1;
@@ -84,12 +109,6 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
         if (newHits > 0 && newHits % 5 === 0) {
             setCombo(prev => prev + 1);
         }
-
-        const pointsGained = circle.type.points * combo;
-        const newScore = internalScore + pointsGained;
-
-        setInternalScore(newScore);
-        setScore(newScore);
 
         let rateDecrement = settings.rateDecrement;
         if (gameMode === 'survival') {
@@ -127,7 +146,7 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
                 setCircles(updatedCircles);
                 setMisses(prev => {
                     const newMisses = prev + missedCount;
-                    if (newMisses > prev) { // A miss occurred
+                    if (newMisses > prev) {
                         resetCombo();
                     }
                     return Math.min(maxMisses, newMisses);
@@ -194,7 +213,10 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
         <div ref={gameAreaRef} className="w-full h-full relative bg-background overflow-hidden" onClick={handleMiss}>
           <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-background/80 backdrop-blur-sm z-10">
             <div className="text-2xl font-bold font-headline flex items-center gap-4">
-              <span>{t.game.score}: {internalScore}</span>
+              <div className="flex items-center gap-2">
+                <Gem className="text-primary" />
+                <span>{internalScore}</span>
+              </div>
               {combo > 1 && (
                 <div className="flex items-center gap-1 text-yellow-500 animate-scale-in">
                     <Zap className="h-6 w-6" />
@@ -209,6 +231,20 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
               {isPaused ? <Play /> : <Pause />}
             </Button>
           </div>
+
+          {floatingScores.map(score => (
+              <div
+                  key={score.id}
+                  className="absolute text-2xl font-bold text-primary animate-float-up"
+                  style={{
+                      left: score.x,
+                      top: score.y,
+                      pointerEvents: 'none'
+                  }}
+              >
+                  +{score.points}
+              </div>
+          ))}
 
           {circles.map(circle => {
             const Icon = circle.type.icon;
