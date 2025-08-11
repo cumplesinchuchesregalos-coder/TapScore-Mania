@@ -324,13 +324,13 @@ export function GameScreen({ onGameOver, activeItem, gameMode, difficulty }: Gam
         }
     }, [gameState, p1State, p2State, onGameOver, maxMisses, gameMode]);
     
-    const renderLives = (misses: number, ghostUsed: boolean) => {
+    const renderLives = (misses: number, ghostUsed: boolean, player?: 1 | 2) => {
       const livesLeft = maxMisses - misses;
       const ghostAvailable = hasGhostEquipped && !ghostUsed;
 
       if (gameMode === 'survival' || gameMode === 'duo') {
         return (
-          <div className="flex items-center gap-2 text-xl font-bold text-destructive">
+          <div className={cn("flex items-center gap-2 text-xl font-bold text-destructive", player === 2 && 'transform rotate-180')}>
             <Shield />
             <span>{livesLeft}/{maxMisses}</span>
             {ghostAvailable && <div className="w-2 h-6 bg-accent rounded-full animate-pulse"></div>}
@@ -352,7 +352,7 @@ export function GameScreen({ onGameOver, activeItem, gameMode, difficulty }: Gam
         const currentState = isDuo ? (player === 1 ? p1State : p2State) : gameState;
         
         return (
-            <div className={cn("absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-background/80 backdrop-blur-sm z-10", isDuo && "relative")}>
+            <div className={cn("absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-background/80 backdrop-blur-sm z-10", isDuo && "relative", player === 2 && 'transform rotate-180')}>
                 <div className="text-2xl font-bold font-headline flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Gem className="text-primary" />
@@ -366,7 +366,7 @@ export function GameScreen({ onGameOver, activeItem, gameMode, difficulty }: Gam
                   )}
                 </div>
                 
-                {renderLives(currentState.misses, currentState.ghostUsed)}
+                {renderLives(currentState.misses, currentState.ghostUsed, player)}
 
                 {!isDuo &&
                     <Button variant="ghost" size="icon" onClick={() => setIsPaused(!isPaused)}>
@@ -421,6 +421,7 @@ export function GameScreen({ onGameOver, activeItem, gameMode, difficulty }: Gam
                         top: circle.y,
                         width: circleDiameter,
                         height: circleDiameter,
+                        transform: player === 2 ? 'rotate(180deg)' : 'none',
                     }}
                     onClick={(e) => handleCircleClick(e, circle.id)}
                 >
@@ -438,11 +439,13 @@ export function GameScreen({ onGameOver, activeItem, gameMode, difficulty }: Gam
                         {isPaused ? <Play /> : <Pause />}
                     </Button>
                 </div>
-                <div ref={p1GameAreaRef} className="w-full h-1/2 relative overflow-hidden border-b-4 border-blue-500" onClick={() => handleGameAreaClick(1)}>
+                {/* Player 1 Area */}
+                <div ref={p1GameAreaRef} className="w-full h-1/2 relative overflow-hidden border-b-4 border-primary" onClick={() => handleGameAreaClick(1)}>
                     {renderHeader(1)}
                     {renderCircles(1)}
                 </div>
-                <div ref={p2GameAreaRef} className="w-full h-1/2 relative overflow-hidden border-t-4 border-red-500" onClick={() => handleGameAreaClick(2)}>
+                {/* Player 2 Area */}
+                <div ref={p2GameAreaRef} className="w-full h-1/2 relative overflow-hidden border-t-4 border-destructive" onClick={() => handleGameAreaClick(2)}>
                     {renderHeader(2)}
                     {renderCircles(2)}
                 </div>
