@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, Check, Lock, Gem } from "lucide-react";
 import { SHOP_ITEMS, type ShopItem } from "@/lib/shop-items";
 import { useLanguage } from "@/context/language-context";
+import { cn } from "@/lib/utils";
 
 interface ShopScreenProps {
   currency: number;
@@ -47,7 +48,7 @@ export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, on
                       <CardDescription className="text-xs h-10">{t.shopItems[item.id]?.description || ''}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex items-center justify-center p-4 flex-grow">
-                      <div className={`w-16 h-16 transition-all duration-300 flex items-center justify-center ${item.className} ${isActive ? 'ring-4 ring-offset-2 ring-primary' : ''}`}>
+                      <div className={cn('w-16 h-16 transition-all duration-300 flex items-center justify-center', item.className, isActive ? 'ring-4 ring-offset-2 ring-primary' : '')}>
                       </div>
                     </CardContent>
                     <CardFooter className="p-2">
