@@ -6,7 +6,7 @@ import { Trophy, ShoppingCart, Settings, Gamepad2 } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 
 interface HomeScreenProps {
-  onNavigate: (target: "shop" | "modes" | "settings") => void;
+  onNavigate: (target: "shop" | "modes" | "settings" | "leaderboard") => void;
   highScore: number;
 }
 
@@ -57,9 +57,9 @@ export function HomeScreen({ onNavigate, highScore }: HomeScreenProps) {
                 <ShoppingCart className="mr-2 h-6 w-6" />
                 {t.home.shop}
             </Button>
-            <Button onClick={() => onNavigate("modes")} variant="secondary" size="lg" className="h-14 text-xl font-semibold rounded-full shadow-md">
-                <Gamepad2 className="mr-2 h-6 w-6" />
-                {t.home.modes}
+            <Button onClick={() => onNavigate("leaderboard")} variant="secondary" size="lg" className="h-14 text-xl font-semibold rounded-full shadow-md">
+                <Trophy className="mr-2 h-6 w-6" />
+                {t.home.ranking}
             </Button>
         </div>
       </div>

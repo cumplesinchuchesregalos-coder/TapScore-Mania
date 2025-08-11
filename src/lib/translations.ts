@@ -6,6 +6,7 @@ export interface Translation {
     play: string;
     shop: string;
     modes: string;
+    ranking: string;
     highScore: string;
   };
   game: {
@@ -85,6 +86,13 @@ export interface Translation {
           title: string;
           language: string;
       }
+  },
+  leaderboard: {
+    title: string;
+    noScores: {
+      title: string;
+      description: string;
+    }
   }
 }
 
@@ -95,6 +103,7 @@ const en: Translation = {
     play: "PLAY",
     shop: "Shop",
     modes: "Modes",
+    ranking: "Ranking",
     highScore: "High Score",
   },
   game: {
@@ -178,6 +187,13 @@ const en: Translation = {
           title: "Language",
           language: "Language"
       }
+  },
+  leaderboard: {
+    title: "Local Ranking",
+    noScores: {
+      title: "No Scores Yet!",
+      description: "Play a game to see your name in lights."
+    }
   }
 };
 
@@ -188,6 +204,7 @@ const es: Translation = {
     play: "JUGAR",
     shop: "Tienda",
     modes: "Modos",
+    ranking: "Ranking",
     highScore: "Puntuación Máxima",
   },
   game: {
@@ -265,12 +282,19 @@ const es: Translation = {
           title: "Audio",
           sound: "Sonido",
           music: "Música",
-          sfx: "Efectos"
+          efectos: "Efectos"
       },
       language: {
           title: "Idioma",
           language: "Idioma"
       }
+  },
+  leaderboard: {
+    title: "Ranking Local",
+    noScores: {
+      title: "Aún no hay puntuaciones",
+      description: "Juega una partida para ver tu nombre en la cima."
+    }
   }
 };
 

@@ -8,6 +8,7 @@ import { GameOverScreen } from "@/components/game/game-over-screen";
 import { ShopScreen } from "@/components/game/shop-screen";
 import { ModesScreen } from "@/components/game/modes-screen";
 import { SettingsScreen } from "@/components/game/settings-screen";
+import { LeaderboardScreen } from "@/components/game/leaderboard-screen";
 import { SHOP_ITEMS, type ShopItem } from "@/lib/shop-items";
 import { Zap } from "lucide-react";
 import { LanguageProvider } from "@/context/language-context";
@@ -16,14 +17,16 @@ import AudioController from "@/components/game/audio-controller";
 
 export type GameMode = "classic" | "survival" | "precision" | "bomb" | "duo";
 export type Difficulty = "easy" | "normal" | "hard";
-type GameState = "home" | "game" | "game-over" | "shop" | "modes" | "settings";
+type GameState = "home" | "game" | "game-over" | "shop" | "modes" | "settings" | "leaderboard";
+
+const MAX_LEADERBOARD_ENTRIES = 5;
 
 export default function Home() {
   const [gameState, setGameState] = useState<GameState>("home");
   const [gameMode, setGameMode] = useState<GameMode>("classic");
   const [difficulty, setDifficulty] = useState<Difficulty>("normal");
   const [score, setScore] = useState(0);
-  const [highScore, setHighScore] = useState(0);
+  const [highScores, setHighScores] = useState<number[]>([]);
   const [finalScores, setFinalScores] = useState<[number, number] | null>(null);
   const [currency, setCurrency] = useState(0);
   const [unlockedItems, setUnlockedItems] = useState<string[]>(['style_default']);
@@ -33,7 +36,9 @@ export default function Home() {
   const [survivalHighScore, setSurvivalHighScore] = useState(0);
 
   useEffect(() => {
-    setHighScore(parseInt(localStorage.getItem("tapscore_highScore") || "0", 10));
+    const storedHighScores = localStorage.getItem("tapscore_highScores");
+    setHighScores(storedHighScores ? JSON.parse(storedHighScores) : []);
+    
     setCurrency(parseInt(localStorage.getItem("tapscore_currency") || "50", 10));
     setGamesPlayed(parseInt(localStorage.getItem("tapscore_gamesPlayed") || "0", 10));
     setSurvivalHighScore(parseInt(localStorage.getItem("tapscore_survivalHighScore") || "0", 10));
@@ -74,12 +79,15 @@ export default function Home() {
     setCurrency(newCurrency);
     localStorage.setItem("tapscore_currency", newCurrency.toString());
 
-    if (gameMode !== 'duo' && finalScore > highScore) {
-      setHighScore(finalScore);
-      localStorage.setItem("tapscore_highScore", finalScore.toString());
+    if (gameMode !== 'duo') {
+      const newHighScores = [...highScores, finalScore]
+        .sort((a, b) => b - a)
+        .slice(0, MAX_LEADERBOARD_ENTRIES);
+      
+      setHighScores(newHighScores);
+      localStorage.setItem("tapscore_highScores", JSON.stringify(newHighScores));
     }
 
-    // Update game stats for unlocking modes
     const newGamesPlayed = gamesPlayed + 1;
     setGamesPlayed(newGamesPlayed);
     localStorage.setItem("tapscore_gamesPlayed", newGamesPlayed.toString());
@@ -89,7 +97,7 @@ export default function Home() {
       localStorage.setItem("tapscore_survivalHighScore", finalScore.toString());
     }
 
-  }, [currency, highScore, gameMode, gamesPlayed, survivalHighScore]);
+  }, [currency, highScores, gameMode, gamesPlayed, survivalHighScore]);
 
   const handlePurchase = (item: ShopItem) => {
     if (currency >= item.price && !unlockedItems.includes(item.id)) {
@@ -117,6 +125,7 @@ export default function Home() {
   }
 
   const renderGameState = () => {
+    const highScore = highScores[0] || 0;
     switch (gameState) {
       case "game":
         return <GameScreen onGameOver={handleGameOver} circleStyle={activeItem} gameMode={gameMode} difficulty={difficulty} />;
@@ -140,6 +149,8 @@ export default function Home() {
                 />;
       case "settings":
         return <SettingsScreen onBack={() => setGameState("home")} />;
+      case "leaderboard":
+        return <LeaderboardScreen onBack={() => setGameState("home")} scores={highScores} />;
       case "home":
       default:
         return <HomeScreen onNavigate={handleNavigate} highScore={highScore} />;
