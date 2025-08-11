@@ -100,6 +100,7 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
 
     const handleMiss = (missAmount = 1) => {
         if(isPaused) return;
+        playSfx(SFX.miss);
         setMisses(m => m + missAmount);
         resetCombo();
     }
@@ -111,10 +112,9 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
         const circle = circles.find(c => c.id === id);
         if (!circle) return;
 
-        playSfx(SFX.tap);
-
         if (gameMode === 'bomb') {
             if (circle.type.type === 'bomb') {
+                playSfx(SFX.miss);
                 onGameOver(internalScore);
                 return;
             }
@@ -128,6 +128,7 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
             }
         }
         
+        playSfx(SFX.tap);
         const pointsGained = circle.type.points * combo;
         const newScore = internalScore + pointsGained;
 
