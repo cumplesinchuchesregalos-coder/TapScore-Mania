@@ -2,14 +2,14 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Pause, Play, XOctagon } from 'lucide-react';
+import { Pause, Play, XOctagon, Heart, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/language-context';
+import type { GameMode } from '@/app/page';
 
 const CIRCLE_DIAMETER = 60;
 const CIRCLE_LIFESPAN = 3000;
 const INITIAL_SPAWN_RATE = 1500;
-const MAX_MISSES = 3;
 
 interface Circle {
   id: number;
@@ -22,9 +22,10 @@ interface GameScreenProps {
   setScore: React.Dispatch<React.SetStateAction<number>>;
   onGameOver: (finalScore: number) => void;
   circleStyle: string;
+  gameMode: GameMode;
 }
 
-export function GameScreen({ setScore, onGameOver, circleStyle }: GameScreenProps) {
+export function GameScreen({ setScore, onGameOver, circleStyle, gameMode }: GameScreenProps) {
     const { t } = useLanguage();
     const [internalScore, setInternalScore] = useState(0);
     const [circles, setCircles] = useState<Circle[]>([]);
@@ -35,6 +36,8 @@ export function GameScreen({ setScore, onGameOver, circleStyle }: GameScreenProp
     const animationFrameId = useRef<number>();
     const lastSpawnTime = useRef<number>(Date.now());
     const spawnRate = useRef(INITIAL_SPAWN_RATE);
+    
+    const maxMisses = gameMode === 'survival' ? 1 : 3;
 
     const handleCircleClick = (e: React.MouseEvent, id: number) => {
         e.stopPropagation();
@@ -45,7 +48,8 @@ export function GameScreen({ setScore, onGameOver, circleStyle }: GameScreenProp
         setInternalScore(newScore);
         setScore(newScore);
 
-        spawnRate.current = Math.max(400, spawnRate.current - 25);
+        const rateDecrement = gameMode === 'survival' ? 40 : 25;
+        spawnRate.current = Math.max(300, spawnRate.current - rateDecrement);
     };
 
     const gameLoop = useCallback(() => {
@@ -68,7 +72,7 @@ export function GameScreen({ setScore, onGameOver, circleStyle }: GameScreenProp
 
             if (missedCount > 0) {
                 setCircles(updatedCircles);
-                setMisses(prev => Math.min(MAX_MISSES, prev + missedCount));
+                setMisses(prev => Math.min(maxMisses, prev + missedCount));
             }
 
             if (now - lastSpawnTime.current > spawnRate.current) {
@@ -84,7 +88,7 @@ export function GameScreen({ setScore, onGameOver, circleStyle }: GameScreenProp
             }
         }
         animationFrameId.current = requestAnimationFrame(gameLoop);
-    }, [isPaused, circles]);
+    }, [isPaused, circles, maxMisses]);
 
     useEffect(() => {
         animationFrameId.current = requestAnimationFrame(gameLoop);
@@ -94,20 +98,37 @@ export function GameScreen({ setScore, onGameOver, circleStyle }: GameScreenProp
     }, [gameLoop]);
 
     useEffect(() => {
-        if (misses >= MAX_MISSES) {
+        if (misses >= maxMisses) {
             if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
             onGameOver(internalScore);
         }
-    }, [misses, onGameOver, internalScore]);
+    }, [misses, onGameOver, internalScore, maxMisses]);
+    
+    const renderLives = () => {
+      if (gameMode === 'survival') {
+        return (
+          <div className="flex items-center gap-2 text-xl font-bold text-destructive">
+            <Shield />
+            <span>{maxMisses - misses}/{maxMisses}</span>
+          </div>
+        )
+      }
+      return (
+        <div className="flex items-center gap-1">
+          {Array.from({ length: maxMisses }).map((_, i) => (
+            <Heart key={i} className={`h-6 w-6 ${i < maxMisses - misses ? 'text-red-500 fill-current' : 'text-muted-foreground'}`} />
+          ))}
+        </div>
+      )
+    }
     
     return (
         <div ref={gameAreaRef} className="w-full h-full relative bg-background overflow-hidden" onClick={() => !isPaused && setMisses(m => m + 1)}>
           <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-background/80 backdrop-blur-sm z-10">
             <div className="text-2xl font-bold font-headline">{t.game.score}: {internalScore}</div>
-            <div className="flex items-center gap-2 text-xl font-bold text-destructive">
-              <XOctagon />
-              <span>{misses}/{MAX_MISSES}</span>
-            </div>
+            
+            {renderLives()}
+
             <Button variant="ghost" size="icon" onClick={() => setIsPaused(!isPaused)}>
               {isPaused ? <Play /> : <Pause />}
             </Button>

@@ -6,15 +6,18 @@ import { HomeScreen } from "@/components/game/home-screen";
 import { GameScreen } from "@/components/game/game-screen";
 import { GameOverScreen } from "@/components/game/game-over-screen";
 import { ShopScreen } from "@/components/game/shop-screen";
+import { ModesScreen } from "@/components/game/modes-screen";
 import { SHOP_ITEMS, type ShopItem } from "@/lib/shop-items";
 import { Button } from "@/components/ui/button";
 import { Zap } from "lucide-react";
 import { LanguageProvider } from "@/context/language-context";
 
-type GameState = "home" | "game" | "game-over" | "shop";
+export type GameMode = "classic" | "survival" | "precision" | "bomb" | "duo";
+type GameState = "home" | "game" | "game-over" | "shop" | "modes";
 
 export default function Home() {
   const [gameState, setGameState] = useState<GameState>("home");
+  const [gameMode, setGameMode] = useState<GameMode>("classic");
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [currency, setCurrency] = useState(0);
@@ -43,8 +46,9 @@ export default function Home() {
     setHydrated(true);
   }, []);
 
-  const handleStartGame = () => {
+  const handleStartGame = (mode: GameMode) => {
     setScore(0);
+    setGameMode(mode);
     setGameState("game");
   };
 
@@ -80,13 +84,17 @@ export default function Home() {
   };
   
   const activeItemStyle = SHOP_ITEMS.find(i => i.id === activeItem)?.className || 'bg-primary rounded-full';
+  
+  const handleNavigate = (target: GameState) => {
+    setGameState(target);
+  }
 
   const renderGameState = () => {
     switch (gameState) {
       case "game":
-        return <GameScreen setScore={setScore} onGameOver={handleGameOver} circleStyle={activeItemStyle} />;
+        return <GameScreen setScore={setScore} onGameOver={handleGameOver} circleStyle={activeItemStyle} gameMode={gameMode} />;
       case "game-over":
-        return <GameOverScreen score={score} highScore={highScore} onRestart={handleStartGame} onHome={() => setGameState("home")} />;
+        return <GameOverScreen score={score} highScore={highScore} onRestart={() => handleStartGame(gameMode)} onHome={() => setGameState("home")} />;
       case "shop":
         return <ShopScreen 
                   currency={currency} 
@@ -96,15 +104,17 @@ export default function Home() {
                   onPurchase={handlePurchase}
                   onEquip={handleEquip}
                 />;
+      case "modes":
+        return <ModesScreen onBack={() => setGameState("home")} onSelectMode={handleStartGame} />;
       case "home":
       default:
-        return <HomeScreen onPlay={handleStartGame} onShop={() => setGameState("shop")} highScore={highScore} />;
+        return <HomeScreen onNavigate={handleNavigate} highScore={highScore} />;
     }
   };
 
   if (!hydrated) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 font-body">
         <Zap className="h-16 w-16 animate-pulse text-primary" />
       </main>
     );

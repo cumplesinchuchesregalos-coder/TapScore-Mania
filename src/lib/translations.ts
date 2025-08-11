@@ -30,6 +30,26 @@ export interface Translation {
   shopItems: {
     [key: string]: string;
   };
+  modes: {
+      title: string;
+      classic: {
+          title: string;
+          description: string;
+      },
+      survival: {
+          title: string;
+          description: string;
+      },
+      precision: {
+          title: string;
+          description: string;
+      },
+      bomb: {
+          title: string;
+          description: string;
+      },
+      comingSoon: string;
+  }
 }
 
 const en: Translation = {
@@ -70,6 +90,26 @@ const en: Translation = {
     style_ring: "The Ring",
     style_ghost: "Ghost",
   },
+  modes: {
+      title: "Select Mode",
+      classic: {
+          title: "Classic",
+          description: "Tap all you can before 3 misses."
+      },
+      survival: {
+          title: "Survival",
+          description: "Circles get faster. Don't miss one!"
+      },
+      precision: {
+          title: "Precision",
+          description: "Only tap the correct circles."
+      },
+      bomb: {
+          title: "Bomb Squad",
+          description: "Avoid the bombs at all cost!"
+      },
+      comingSoon: "Coming Soon"
+  }
 };
 
 const es: Translation = {
@@ -110,6 +150,26 @@ const es: Translation = {
     style_ring: "El Anillo",
     style_ghost: "Fantasma",
   },
+  modes: {
+      title: "Elige un Modo",
+      classic: {
+          title: "Clásico",
+          description: "Toca todo lo que puedas antes de 3 fallos."
+      },
+      survival: {
+          title: "Supervivencia",
+          description: "¡Los círculos se aceleran. No falles ni uno!"
+      },
+      precision: {
+          title: "Precisión",
+          description: "Solo toca los círculos correctos."
+      },
+      bomb: {
+          title: "Antiexplosivos",
+          description: "¡Evita las bombas a toda costa!"
+      },
+      comingSoon: "Próximamente"
+  }
 };
 
 export const translations = { en, es };
