@@ -4,22 +4,26 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Check, Lock, Gem } from "lucide-react";
-import { SHOP_ITEMS, type ShopItem } from "@/lib/shop-items";
+import { ArrowLeft, Check, Lock, Gem, Loader2 } from "lucide-react";
+import { type ShopItem } from "@/lib/shop-items";
 import { useLanguage } from "@/context/language-context";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
+
 
 interface ShopScreenProps {
   currency: number;
+  shopItems: ShopItem[];
   unlockedItems: string[];
   activeItem: string;
   onPurchase: (item: ShopItem) => void;
   onEquip: (itemId: string) => void;
   onBack: () => void;
+  isGeneratingImages: boolean;
 }
 
-export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, onEquip, onBack }: ShopScreenProps) {
+export function ShopScreen({ currency, shopItems, unlockedItems, activeItem, onPurchase, onEquip, onBack, isGeneratingImages }: ShopScreenProps) {
   const { t } = useLanguage();
   return (
     <div className="flex flex-col h-full bg-card">
@@ -37,10 +41,11 @@ export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, on
         <div className="p-4">
             <h3 className="text-lg font-semibold text-muted-foreground mb-4 px-2">{t.shop.circleStyles}</h3>
             <div className="grid grid-cols-2 gap-4">
-            {SHOP_ITEMS.map(item => {
+            {shopItems.map(item => {
                 const isUnlocked = unlockedItems.includes(item.id);
                 const isActive = activeItem === item.id;
                 const canAfford = currency >= item.price;
+                const isGenerating = isGeneratingImages && item.imageHint;
                 
                 return (
                 <Card key={item.id} className="flex flex-col text-center shadow-md transition-transform hover:scale-105">
@@ -50,13 +55,14 @@ export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, on
                     </CardHeader>
                     <CardContent className="flex items-center justify-center p-4 flex-grow">
                       <div className={cn('w-16 h-16 transition-all duration-300 flex items-center justify-center', isActive ? 'ring-4 ring-offset-2 ring-primary rounded-full' : '')}>
-                        {item.imageUrl ? (
+                        {isGenerating ? (
+                           <Skeleton className="w-16 h-16 rounded-full" />
+                        ) : item.imageUrl ? (
                           <Image 
                             src={item.imageUrl} 
                             alt={t.shopItems[item.id]?.name || item.name}
                             width={64}
                             height={64}
-                            data-ai-hint={item.imageHint}
                             className="object-contain"
                           />
                         ) : (
@@ -71,9 +77,9 @@ export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, on
                         {isActive ? t.shop.equipped : t.shop.equip}
                         </Button>
                     ) : (
-                        <Button onClick={() => onPurchase(item)} disabled={!canAfford} className="w-full rounded-full">
-                        <Lock className="mr-2 h-4 w-4" />
-                        {item.price}
+                        <Button onClick={() => onPurchase(item)} disabled={!canAfford || isGenerating} className="w-full rounded-full">
+                        {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
+                        {isGenerating ? "..." : item.price}
                         </Button>
                     )}
                     </CardFooter>

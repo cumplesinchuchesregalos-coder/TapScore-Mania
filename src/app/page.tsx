@@ -14,6 +14,7 @@ import { Zap } from "lucide-react";
 import { LanguageProvider } from "@/context/language-context";
 import { AudioProvider } from "@/context/audio-context";
 import AudioController from "@/components/game/audio-controller";
+import { generateItemImage } from "@/ai/flows/generate-item-image-flow";
 
 export type GameMode = "classic" | "survival" | "precision" | "bomb" | "duo";
 export type Difficulty = "easy" | "normal" | "hard";
@@ -34,30 +35,43 @@ export default function Home() {
   const [hydrated, setHydrated] = useState(false);
   const [gamesPlayed, setGamesPlayed] = useState(0);
   const [survivalHighScore, setSurvivalHighScore] = useState(0);
+  const [shopItems, setShopItems] = useState<ShopItem[]>(SHOP_ITEMS);
+  const [isGeneratingImages, setIsGeneratingImages] = useState(true);
 
   useEffect(() => {
-    const storedHighScores = localStorage.getItem("tapscore_highScores");
-    setHighScores(storedHighScores ? JSON.parse(storedHighScores) : []);
-    
-    setCurrency(parseInt(localStorage.getItem("tapscore_currency") || "50", 10));
-    setGamesPlayed(parseInt(localStorage.getItem("tapscore_gamesPlayed") || "0", 10));
-    setSurvivalHighScore(parseInt(localStorage.getItem("tapscore_survivalHighScore") || "0", 10));
-    
-    const storedUnlocked = localStorage.getItem("tapscore_unlockedItems");
-    if (storedUnlocked) {
-      setUnlockedItems(JSON.parse(storedUnlocked));
-    } else {
-      localStorage.setItem("tapscore_unlockedItems", JSON.stringify(['style_default']));
-    }
+    const loadGameData = async () => {
+      // Load from localStorage first
+      const storedHighScores = localStorage.getItem("tapscore_highScores");
+      setHighScores(storedHighScores ? JSON.parse(storedHighScores) : []);
+      setCurrency(parseInt(localStorage.getItem("tapscore_currency") || "50", 10));
+      setGamesPlayed(parseInt(localStorage.getItem("tapscore_gamesPlayed") || "0", 10));
+      setSurvivalHighScore(parseInt(localStorage.getItem("tapscore_survivalHighScore") || "0", 10));
+      const storedUnlocked = localStorage.getItem("tapscore_unlockedItems");
+      setUnlockedItems(storedUnlocked ? JSON.parse(storedUnlocked) : ['style_default']);
+      const storedActive = localStorage.getItem("tapscore_activeItem");
+      setActiveItem(storedActive || 'style_default');
 
-    const storedActive = localStorage.getItem("tapscore_activeItem");
-    if (storedActive) {
-      setActiveItem(storedActive);
-    } else {
-      localStorage.setItem("tapscore_activeItem", 'style_default');
-    }
+      // Generate images for shop items that have a hint
+      const imageGenerationPromises = SHOP_ITEMS.map(async (item) => {
+        if (item.imageHint) {
+          try {
+            const result = await generateItemImage({ description: item.imageHint });
+            return { ...item, imageUrl: result.imageDataUri };
+          } catch (error) {
+            console.error(`Failed to generate image for ${item.name}:`, error);
+            return item; // Return original item on failure
+          }
+        }
+        return item;
+      });
 
-    setHydrated(true);
+      const updatedItems = await Promise.all(imageGenerationPromises);
+      setShopItems(updatedItems);
+      setIsGeneratingImages(false);
+      setHydrated(true);
+    };
+    
+    loadGameData();
   }, []);
 
   const handleStartGame = (mode: GameMode, difficulty: Difficulty) => {
@@ -118,27 +132,29 @@ export default function Home() {
     }
   };
   
-  const activeItemStyle = SHOP_ITEMS.find(i => i.id === activeItem)?.className || 'bg-primary rounded-full';
-  
   const handleNavigate = (target: GameState) => {
     setGameState(target);
   }
 
   const renderGameState = () => {
     const highScore = highScores[0] || 0;
+    const activeItemStyle = shopItems.find(i => i.id === activeItem);
+
     switch (gameState) {
       case "game":
-        return <GameScreen onGameOver={handleGameOver} circleStyle={activeItem} gameMode={gameMode} difficulty={difficulty} />;
+        return <GameScreen onGameOver={handleGameOver} activeItem={activeItemStyle} gameMode={gameMode} difficulty={difficulty} />;
       case "game-over":
         return <GameOverScreen score={score} highScore={highScore} onRestart={() => handleStartGame(gameMode, difficulty)} onHome={() => setGameState("home")} gameMode={gameMode} finalScores={finalScores} />;
       case "shop":
         return <ShopScreen 
                   currency={currency} 
+                  shopItems={shopItems}
                   onBack={() => setGameState("home")}
                   unlockedItems={unlockedItems}
                   activeItem={activeItem}
                   onPurchase={handlePurchase}
                   onEquip={handleEquip}
+                  isGeneratingImages={isGeneratingImages}
                 />;
       case "modes":
         return <ModesScreen 
@@ -160,7 +176,10 @@ export default function Home() {
   if (!hydrated) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 font-body">
-        <Zap className="h-16 w-16 animate-pulse text-primary" />
+        <div className="flex flex-col items-center gap-4">
+            <Zap className="h-16 w-16 animate-pulse text-primary" />
+            <p className="text-muted-foreground animate-pulse">Generando items...</p>
+        </div>
       </main>
     );
   }

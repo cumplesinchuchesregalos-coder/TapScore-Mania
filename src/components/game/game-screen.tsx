@@ -9,7 +9,7 @@ import { useAudio } from '@/context/audio-context';
 import type { GameMode, Difficulty } from '@/app/page';
 import { SFX } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
-import { SHOP_ITEMS } from '@/lib/shop-items';
+import { type ShopItem } from '@/lib/shop-items';
 import Image from "next/image";
 
 interface Circle {
@@ -38,7 +38,7 @@ interface GameState {
 }
 interface GameScreenProps {
   onGameOver: (finalScore: number, finalScores?: [number, number]) => void;
-  circleStyle: string; // This is the activeItem ID from page.tsx
+  activeItem?: ShopItem;
   gameMode: GameMode;
   difficulty: Difficulty;
 }
@@ -72,7 +72,7 @@ const BOMB_TYPE = { type: 'bomb', color: 'bg-destructive', points: 0, lifespan: 
 const PRECISION_TARGET_TYPE = { type: 'precision_target', color: 'bg-primary', points: 5, lifespan: 2000, icon: Target };
 const PRECISION_DECOY_TYPE = { type: 'precision_decoy', color: 'bg-muted-foreground', points: 0, lifespan: 2000 };
 
-export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, difficulty }: GameScreenProps) {
+export function GameScreen({ onGameOver, activeItem, gameMode, difficulty }: GameScreenProps) {
     const { t } = useLanguage();
     const { playSfx } = useAudio();
     
@@ -99,8 +99,8 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
     const maxMisses = gameMode === 'survival' ? 1 : 3;
 
     // Power-up logic
-    const hasRingEquipped = activeItemId === 'style_ring';
-    const hasGhostEquipped = activeItemId === 'style_ghost';
+    const hasRingEquipped = activeItem?.id === 'style_ring';
+    const hasGhostEquipped = activeItem?.id === 'style_ghost';
     const circleDiameter = hasRingEquipped ? BASE_CIRCLE_DIAMETER * 1.2 : BASE_CIRCLE_DIAMETER;
 
     const resetCombo = (player?: 1 | 2) => {
@@ -378,35 +378,32 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
     }
 
     const renderCircles = (player?: 1 | 2) => {
-        const activeItem = SHOP_ITEMS.find(i => i.id === activeItemId);
-    
         return circles.filter(c => c.player === player).map(circle => {
             const Icon = circle.type.icon;
-    
             let circleContent: React.ReactNode;
-
+    
+            // Case 1: Special circle with a dedicated icon (Bomb, Target, Gem)
             if (Icon) {
-                // Case 1: Special circle with a dedicated icon (Bomb, Target, Gem)
                 circleContent = (
                     <div className={cn('w-full h-full flex items-center justify-center rounded-full', circle.type.color)}>
                         <Icon className="h-8 w-8 text-white" />
                     </div>
                 );
-            } else if (activeItem?.imageUrl) {
-                // Case 2: A custom image is equipped. Use it for all non-special circles.
+            } 
+            // Case 2: A custom image is equipped. Use it for all non-special circles.
+            else if (activeItem?.imageUrl) {
                 circleContent = (
                     <Image
                         src={activeItem.imageUrl}
                         alt={activeItem.name}
                         width={circleDiameter}
                         height={circleDiameter}
-                        data-ai-hint={activeItem.imageHint}
                         className="object-contain"
                     />
                 );
-            } else {
-                // Case 3: No custom image equipped. Use colored circles.
-                // The color is from the circle type, unless it's a default circle, then use the active item's class.
+            } 
+            // Case 3: No custom image equipped. Use colored circles.
+            else {
                 const colorClass = circle.type.type === 'default' && activeItem?.className ? activeItem.className : circle.type.color;
                 circleContent = (
                     <div className={cn('w-full h-full flex items-center justify-center rounded-full text-white font-bold text-sm', colorClass)}>
@@ -414,7 +411,7 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
                     </div>
                 );
             }
-
+    
             return (
                 <div
                     key={circle.id}
