@@ -3,7 +3,10 @@
 
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
+import { useAudio } from "@/context/audio-context";
 import { Award, Home, RotateCw } from "lucide-react";
+import { useEffect } from "react";
+import { SFX } from "@/lib/sfx";
 
 interface GameOverScreenProps {
   score: number;
@@ -14,7 +17,14 @@ interface GameOverScreenProps {
 
 export function GameOverScreen({ score, highScore, onRestart, onHome }: GameOverScreenProps) {
   const { t } = useLanguage();
+  const { playSfx } = useAudio();
   const isNewHighScore = score > 0 && score === highScore;
+
+  useEffect(() => {
+    if (isNewHighScore) {
+      playSfx(SFX.combo); // Play a celebratory sound for new high scores
+    }
+  }, [isNewHighScore, playSfx]);
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-8 bg-card text-center animate-scale-in">

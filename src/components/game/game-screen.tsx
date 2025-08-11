@@ -192,11 +192,12 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
             });
 
             if (missedCount > 0) {
-                setCircles(updatedCircles);
-                handleMiss(missedCount);
-            } else {
-                setCircles(updatedCircles);
+                // Don't call handleMiss here to avoid multiple sounds at once
+                setMisses(m => m + missedCount);
+                resetCombo();
             }
+            
+            setCircles(updatedCircles);
 
             if (now - lastSpawnTime.current > spawnRate.current) {
                 lastSpawnTime.current = now;
