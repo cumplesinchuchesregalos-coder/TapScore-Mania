@@ -6,27 +6,49 @@ export function Logo() {
     <svg 
       width="150" 
       height="150" 
-      viewBox="0 0 512 512" 
+      viewBox="0 0 150 150" 
       fill="none" 
-      xmlns="http://www.w3.org/2000/svg" 
-      xmlnsXlink="http://www.w3.org/1999/xlink"
+      xmlns="http://www.w3.org/2000/svg"
       className="w-48 h-48"
     >
-      <rect width="512" height="512" fill="#8B5CF6"/>
-      <path d="M256 10C147.6 10 60 97.6 60 206C60 314.4 147.6 402 256 402C364.4 402 452 314.4 452 206C452 97.6 364.4 10 256 10Z" fill="black"/>
-      <path d="M256 32C159.2 32 82 109.2 82 206C82 302.8 159.2 380 256 380C352.8 380 430 302.8 430 206C430 109.2 352.8 32 256 32Z" fill="white"/>
-      <path d="M256 206C256 149.2 210.8 104 256 104C301.2 104 348 149.2 348 206C348 262.8 301.2 308 256 308C210.8 308 256 262.8 256 206Z" fill="#E5E7EB"/>
-      <path d="M256 94C201.2 94 156 140.2 156 196C156 251.8 201.2 298 256 298C310.8 298 356 251.8 356 196C356 140.2 310.8 94 256 94Z" stroke="white" strokeWidth="20"/>
-      <path d="M256 134C221.6 134 194 162.6 194 196C194 229.4 221.6 258 256 258C290.4 258 318 229.4 318 196C318 162.6 290.4 134 256 134Z" stroke="black" strokeWidth="10"/>
-      <path d="M256 150C229 150 207 171 207 196C207 221 229 242 256 242C283 242 305 221 305 196C305 171 283 150 256 150Z" fill="white"/>
-      <path d="M255 178C255 167 246 158 235 158C224 158 215 167 215 178C215 189 224 198 235 198C246 198 255 189 255 178Z" fill="white"/>
-      <path d="M288.667 364.333C291.333 346.833 286.133 345.567 282 346.667L267.333 350.333L268.667 326.667C269.467 312.833 268.667 296.167 254.667 288.333C251.467 286.667 249.333 282.667 249.333 279V211.333C249.333 203.467 255.467 197.333 263.333 197.333C271.2 197.333 277.333 203.467 277.333 211.333V261.667C277.333 266.833 281.467 271 286.667 271C291.833 271 296 266.833 296 261.667V248.333C296 238.667 303.467 231.2 313.133 231.2H314.467C320.133 231.2 324.667 235.467 324.667 241C324.667 246.533 320.133 250.8 314.467 250.8H313.133C311.267 250.8 309.733 252.333 309.733 254.2V275.533C309.733 283.4 315.867 289.533 323.733 289.533H325.067C330.733 289.533 335.267 293.8 335.267 299.333C335.267 304.867 330.733 309.133 325.067 309.133H323.733C321.867 309.133 320.4 310.667 320.4 312.533V329.867C320.4 337.733 326.533 343.867 334.4 343.867H335.733C341.4 343.867 345.933 348.133 345.933 353.667C345.933 359.2 341.4 363.467 335.733 363.467H288.667V364.333Z" fill="#FFC107"/>
-      <path d="M72 412H440" stroke="white" strokeWidth="12" />
-      <text x="72" y="470" fill="white" fontSize="80" fontWeight="bold" fontFamily="Fredoka One, sans-serif">TAPSCORE</text>
+      <rect width="150" height="150" fill="#8B5CF6"/>
+      <g filter="url(#filter0_d_1_1)">
+        <circle cx="75" cy="65" r="45" fill="white"/>
+        <circle cx="75" cy="65" r="42.5" stroke="black" strokeWidth="5"/>
+      </g>
+      <g filter="url(#filter1_d_1_1)">
+        <path d="M75 35C91.5685 35 105 48.4315 105 65C105 81.5685 91.5685 95 75 95C58.4315 95 45 81.5685 45 65C45 48.4315 58.4315 35 75 35Z" fill="white"/>
+      </g>
+      <circle cx="75" cy="65" r="42.5" stroke="black" strokeWidth="5"/>
+      <path d="M75 60C77.7614 60 80 57.7614 80 55C80 52.2386 77.7614 50 75 50C72.2386 50 70 52.2386 70 55C70 57.7614 72.2386 60 75 60Z" fill="black"/>
+      <path d="M72.5 60C72.5 58.6193 73.6193 57.5 75 57.5C76.3807 57.5 77.5 58.6193 77.5 60C77.5 61.3807 76.3807 62.5 75 62.5C73.6193 62.5 72.5 61.3807 72.5 60Z" fill="white"/>
+      <path d="M83.9999 87.5C83.9999 88.5 83.4999 89 82.9999 89C82.4999 89 81.9999 88.5 81.9999 88.5L81.4999 83C81.4999 82 80.4999 81.5 79.9999 81.5H70.4999C69.9999 81.5 68.9999 82 68.9999 83L68.4999 88.5C68.4999 89 67.9999 89.5 67.4999 89.5C66.9999 89.5 66.4999 89 66.4999 88.5L67.4999 78.5C67.4999 77.5 68.4999 76.5 69.4999 76.5H80.9999C81.9999 76.5 82.9999 77.5 82.9999 78.5L83.9999 87.5Z" fill="#FFC107"/>
+      <path d="M78.5 72.5C78.5 74.1569 77.1569 75.5 75.5 75.5V78.5C78.8137 78.5 81.5 75.8137 81.5 72.5H78.5ZM75.5 75.5C73.8431 75.5 72.5 74.1569 72.5 72.5H69.5C69.5 75.8137 72.1863 78.5 75.5 78.5V75.5ZM72.5 72.5C72.5 70.8431 73.8431 69.5 75.5 69.5V66.5C72.1863 66.5 69.5 69.1863 69.5 72.5H72.5ZM75.5 69.5C77.1569 69.5 78.5 70.8431 78.5 72.5H81.5C81.5 69.1863 78.8137 66.5 75.5 66.5V69.5Z" fill="#FFC107"/>
+      <text fill="white" xmlSpace="preserve" style={{whiteSpace: "pre"}} fontFamily="Fredoka One" fontSize="16" fontWeight="bold" letterSpacing="0.1em">
+        <tspan x="25" y="125">TAPSCORE</tspan>
+      </text>
+      <defs>
+        <filter id="filter0_d_1_1" x="26" y="20" width="98" height="98" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+          <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+          <feOffset dy="4"/>
+          <feGaussianBlur stdDeviation="2"/>
+          <feComposite in2="hardAlpha" operator="out"/>
+          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1"/>
+          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape"/>
+        </filter>
+        <filter id="filter1_d_1_1" x="43.5" y="34" width="63" height="63" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+          <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+          <feOffset dy="1"/>
+          <feGaussianBlur stdDeviation="1.5"/>
+          <feComposite in2="hardAlpha" operator="out"/>
+          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0"/>
+          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1"/>
+          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape"/>
+        </filter>
+      </defs>
     </svg>
   );
 }
-
-  
-
-    
