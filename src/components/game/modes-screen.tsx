@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { ArrowLeft, Gamepad2, Shield, Target, Bomb, Lock } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import type { GameMode, Difficulty } from "@/app/page";
+import { Badge } from '@/components/ui/badge';
 
 interface ModesScreenProps {
   onBack: () => void;
@@ -63,7 +64,12 @@ export function ModesScreen({ onBack, onSelectMode }: ModesScreenProps) {
                         <CardTitle>{mode.title}</CardTitle>
                         <CardDescription className="text-xs">{mode.description}</CardDescription>
                     </div>
-                    {!mode.enabled && <Lock className="w-5 h-5 text-muted-foreground" />}
+                    {!mode.enabled && (
+                      <div className="flex flex-col items-center gap-1">
+                        <Lock className="w-5 h-5 text-muted-foreground" />
+                        <Badge variant="outline">{t.modes.comingSoon}</Badge>
+                      </div>
+                    )}
                 </CardHeader>
                 {selectedMode === mode.id && mode.enabled && (
                     <CardFooter className="flex justify-around bg-muted/50 p-2">
