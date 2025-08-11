@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 export const metadata: Metadata = {
   title: 'TapScore Mania',
   description: 'An addictive tapping game built with Next.js',
+  manifest: '/manifest.webmanifest',
 };
 
 export default function RootLayout({
