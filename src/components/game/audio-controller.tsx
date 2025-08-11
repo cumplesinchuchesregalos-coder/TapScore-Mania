@@ -1,20 +1,23 @@
 
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAudio } from '@/context/audio-context';
 
 const AudioController = () => {
   const { isMuted } = useAudio();
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [audioSrc, setAudioSrc] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    // We need to set the source on the client side to ensure it's loaded correctly.
+    setAudioSrc("/audio/background-music.mp3");
+  }, []);
+
 
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.muted = isMuted;
-      audioRef.current.play().catch(e => {
-        // Autoplay is often blocked, user interaction is needed
-        console.log("Waiting for user interaction to play music.");
-      });
     }
   }, [isMuted]);
 
@@ -26,15 +29,26 @@ const AudioController = () => {
       }
       window.removeEventListener('click', playMusic);
     }
+    
+    // Autoplay is often blocked, user interaction is needed
+    if (audioRef.current) {
+        audioRef.current.play().then(() => {
+             window.removeEventListener('click', playMusic);
+        }).catch(e => {
+            console.log("Waiting for user interaction to play music.");
+            window.addEventListener('click', playMusic);
+        });
+    }
 
-    window.addEventListener('click', playMusic);
 
     return () => {
         window.removeEventListener('click', playMusic);
     }
-  }, []);
+  }, [audioSrc]);
 
-  return <audio ref={audioRef} src="/audio/background-music.mp3" loop />;
+  if (!audioSrc) return null;
+
+  return <audio ref={audioRef} src={audioSrc} loop />;
 };
 
 export default AudioController;
