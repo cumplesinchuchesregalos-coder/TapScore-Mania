@@ -8,15 +8,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  images: {
-    // Allow 'data:' URLs for the generated images from AI
-    remotePatterns: [
-      {
-        protocol: 'data',
-        hostname: '**',
-      },
-    ],
-  },
 };
 
 export default nextConfig;
