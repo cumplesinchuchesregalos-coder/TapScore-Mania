@@ -6,7 +6,7 @@ import Image from "next/image";
 export function Logo() {
   return (
     <Image
-      src="/images/logo.png"
+      src="/audio/images/logo.png"
       alt="TapScore Mania Logo"
       width={192}
       height={192}
