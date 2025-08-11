@@ -4,25 +4,29 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { ArrowLeft, Gamepad2, Shield, Target, Bomb, Lock } from "lucide-react";
+import { ArrowLeft, Gamepad2, Shield, Target, Bomb, Lock, Check } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import type { GameMode, Difficulty } from "@/app/page";
-import { Badge } from '@/components/ui/badge';
 
 interface ModesScreenProps {
   onBack: () => void;
   onSelectMode: (mode: GameMode, difficulty: Difficulty) => void;
+  gamesPlayed: number;
+  survivalHighScore: number;
 }
 
-export function ModesScreen({ onBack, onSelectMode }: ModesScreenProps) {
+export function ModesScreen({ onBack, onSelectMode, gamesPlayed, survivalHighScore }: ModesScreenProps) {
   const { t } = useLanguage();
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
+
+  const precisionUnlocked = gamesPlayed >= 3;
+  const bombUnlocked = survivalHighScore >= 50;
 
   const modes = [
     { id: 'classic', icon: Gamepad2, title: t.modes.classic.title, description: t.modes.classic.description, enabled: true },
     { id: 'survival', icon: Shield, title: t.modes.survival.title, description: t.modes.survival.description, enabled: true },
-    { id: 'precision', icon: Target, title: t.modes.precision.title, description: t.modes.precision.description, enabled: true },
-    { id: 'bomb', icon: Bomb, title: t.modes.bomb.title, description: t.modes.bomb.description, enabled: true },
+    { id: 'precision', icon: Target, title: t.modes.precision.title, description: t.modes.precision.description, enabled: precisionUnlocked, unlockCondition: t.modes.unlockConditions.precision },
+    { id: 'bomb', icon: Bomb, title: t.modes.bomb.title, description: t.modes.bomb.description, enabled: bombUnlocked, unlockCondition: t.modes.unlockConditions.bomb },
   ];
 
   const difficulties: {id: Difficulty, label: string}[] = [
@@ -53,23 +57,20 @@ export function ModesScreen({ onBack, onSelectMode }: ModesScreenProps) {
             return (
               <Card 
                 key={mode.id} 
-                className={`transition-all ${mode.enabled ? 'cursor-pointer hover:border-primary' : 'opacity-60 bg-muted'}`}
+                className={`transition-all ${mode.enabled ? 'cursor-pointer hover:border-primary' : 'opacity-70 bg-muted/50'}`}
                 onClick={() => handleModeClick(mode.id as GameMode)}
               >
-                <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                    <div className="bg-primary/10 p-3 rounded-full">
+                <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-2">
+                    <div className="bg-primary/10 p-3 rounded-full mt-2">
                         <Icon className="w-6 h-6 text-primary" />
                     </div>
                     <div className="flex-1">
                         <CardTitle>{mode.title}</CardTitle>
-                        <CardDescription className="text-xs">{mode.description}</CardDescription>
+                        <CardDescription className="text-xs leading-tight">{mode.enabled ? mode.description : mode.unlockCondition}</CardDescription>
                     </div>
-                    {!mode.enabled && (
-                      <div className="flex flex-col items-center gap-1">
-                        <Lock className="w-5 h-5 text-muted-foreground" />
-                        <Badge variant="outline">{t.modes.comingSoon}</Badge>
-                      </div>
-                    )}
+                    <div className="p-2">
+                      {mode.enabled ? <Check className="w-6 h-6 text-green-500" /> : <Lock className="w-6 h-6 text-muted-foreground" />}
+                    </div>
                 </CardHeader>
                 {selectedMode === mode.id && mode.enabled && (
                     <CardFooter className="flex justify-around bg-muted/50 p-2">

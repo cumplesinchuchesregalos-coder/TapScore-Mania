@@ -48,7 +48,10 @@ export interface Translation {
           title: string;
           description: string;
       },
-      comingSoon: string;
+      unlockConditions: {
+        precision: string;
+        bomb: string;
+      },
       difficulty: {
         easy: string;
         normal: string;
@@ -124,7 +127,10 @@ const en: Translation = {
           title: "Bomb Squad",
           description: "Avoid the bombs at all cost!"
       },
-      comingSoon: "Coming Soon",
+      unlockConditions: {
+        precision: "Play 3 games to unlock.",
+        bomb: "Score 50 points in Survival to unlock."
+      },
       difficulty: {
         easy: "Easy",
         normal: "Normal",
@@ -200,7 +206,10 @@ const es: Translation = {
           title: "Antiexplosivos",
           description: "¡Evita las bombas a toda costa!"
       },
-      comingSoon: "Próximamente",
+      unlockConditions: {
+        precision: "Juega 3 partidas para desbloquear.",
+        bomb: "Logra 50 puntos en Supervivencia para desbloquear."
+      },
       difficulty: {
         easy: "Fácil",
         normal: "Normal",

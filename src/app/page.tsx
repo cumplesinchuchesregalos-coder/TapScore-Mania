@@ -28,10 +28,14 @@ export default function Home() {
   const [unlockedItems, setUnlockedItems] = useState<string[]>(['style_default']);
   const [activeItem, setActiveItem] = useState<string>('style_default');
   const [hydrated, setHydrated] = useState(false);
+  const [gamesPlayed, setGamesPlayed] = useState(0);
+  const [survivalHighScore, setSurvivalHighScore] = useState(0);
 
   useEffect(() => {
     setHighScore(parseInt(localStorage.getItem("tapscore_highScore") || "0", 10));
     setCurrency(parseInt(localStorage.getItem("tapscore_currency") || "50", 10));
+    setGamesPlayed(parseInt(localStorage.getItem("tapscore_gamesPlayed") || "0", 10));
+    setSurvivalHighScore(parseInt(localStorage.getItem("tapscore_survivalHighScore") || "0", 10));
     
     const storedUnlocked = localStorage.getItem("tapscore_unlockedItems");
     if (storedUnlocked) {
@@ -67,7 +71,18 @@ export default function Home() {
       setHighScore(finalScore);
       localStorage.setItem("tapscore_highScore", finalScore.toString());
     }
-  }, [currency, highScore]);
+
+    // Update game stats for unlocking modes
+    const newGamesPlayed = gamesPlayed + 1;
+    setGamesPlayed(newGamesPlayed);
+    localStorage.setItem("tapscore_gamesPlayed", newGamesPlayed.toString());
+
+    if (gameMode === 'survival' && finalScore > survivalHighScore) {
+      setSurvivalHighScore(finalScore);
+      localStorage.setItem("tapscore_survivalHighScore", finalScore.toString());
+    }
+
+  }, [currency, highScore, gameMode, gamesPlayed, survivalHighScore]);
 
   const handlePurchase = (item: ShopItem) => {
     if (currency >= item.price && !unlockedItems.includes(item.id)) {
@@ -110,7 +125,12 @@ export default function Home() {
                   onEquip={handleEquip}
                 />;
       case "modes":
-        return <ModesScreen onBack={() => setGameState("home")} onSelectMode={handleStartGame} />;
+        return <ModesScreen 
+                  onBack={() => setGameState("home")} 
+                  onSelectMode={handleStartGame} 
+                  gamesPlayed={gamesPlayed}
+                  survivalHighScore={survivalHighScore}
+                />;
       case "settings":
         return <SettingsScreen onBack={() => setGameState("home")} />;
       case "home":
