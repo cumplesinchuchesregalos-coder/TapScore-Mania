@@ -42,10 +42,11 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const playSfx = useCallback((sfxUrl: string) => {
-    if (!isMuted && audioPlayers.current.length > 0) {
+    // Safeguard: Only play if the URL is valid and we are not muted.
+    if (sfxUrl && !isMuted && audioPlayers.current.length > 0) {
         const player = audioPlayers.current[currentPlayerIndex.current];
         player.src = sfxUrl;
-        player.play().catch(e => console.error("Error playing SFX:", e));
+        player.play().catch(e => console.error("Error playing SFX:", e.message));
 
         currentPlayerIndex.current = (currentPlayerIndex.current + 1) % MAX_AUDIO_PLAYERS;
     }
