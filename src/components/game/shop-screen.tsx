@@ -44,10 +44,11 @@ export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, on
                 <Card key={item.id} className="flex flex-col text-center shadow-md transition-transform hover:scale-105">
                     <CardHeader className="pb-2 flex-grow">
                       <CardTitle className="text-base">{t.shopItems[item.id]?.name || item.name}</CardTitle>
-                      <CardDescription className="text-xs">{t.shopItems[item.id]?.description || ''}</CardDescription>
+                      <CardDescription className="text-xs h-10">{t.shopItems[item.id]?.description || ''}</CardDescription>
                     </CardHeader>
-                    <CardContent className="flex items-center justify-center p-4">
-                      <div className={`w-16 h-16 transition-all duration-300 ${item.className} ${isActive ? 'ring-4 ring-offset-2 ring-primary' : ''}`}></div>
+                    <CardContent className="flex items-center justify-center p-4 flex-grow">
+                      <div className={`w-16 h-16 transition-all duration-300 flex items-center justify-center ${item.className} ${isActive ? 'ring-4 ring-offset-2 ring-primary' : ''}`}>
+                      </div>
                     </CardContent>
                     <CardFooter className="p-2">
                     {isUnlocked ? (
