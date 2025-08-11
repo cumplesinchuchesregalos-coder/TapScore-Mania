@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -8,6 +9,7 @@ import { ShopScreen } from "@/components/game/shop-screen";
 import { SHOP_ITEMS, type ShopItem } from "@/lib/shop-items";
 import { Button } from "@/components/ui/button";
 import { Zap } from "lucide-react";
+import { LanguageProvider } from "@/context/language-context";
 
 type GameState = "home" | "game" | "game-over" | "shop";
 
@@ -96,13 +98,15 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground p-2 sm:p-4 font-body">
-      <div className="relative w-full max-w-md h-[90vh] max-h-[800px] bg-card rounded-2xl shadow-2xl overflow-hidden border-4 border-primary/20 flex flex-col">
-        {renderGameState()}
-      </div>
-      <footer className="text-center p-4 text-muted-foreground text-sm">
-        <p>Built for Fun. Tap away!</p>
-      </footer>
-    </main>
+    <LanguageProvider>
+      <main className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground p-2 sm:p-4 font-body">
+        <div className="relative w-full max-w-md h-[90vh] max-h-[800px] bg-card rounded-2xl shadow-2xl overflow-hidden border-4 border-primary/20 flex flex-col">
+          {renderGameState()}
+        </div>
+        <footer className="text-center p-4 text-muted-foreground text-sm">
+          <p>Built for Fun. Tap away!</p>
+        </footer>
+      </main>
+    </LanguageProvider>
   );
 }

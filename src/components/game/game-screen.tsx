@@ -1,8 +1,10 @@
+
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Pause, Play, XOctagon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/context/language-context';
 
 const CIRCLE_DIAMETER = 60;
 const CIRCLE_LIFESPAN = 3000;
@@ -23,6 +25,7 @@ interface GameScreenProps {
 }
 
 export function GameScreen({ setScore, onGameOver, circleStyle }: GameScreenProps) {
+    const { t } = useLanguage();
     const [internalScore, setInternalScore] = useState(0);
     const [circles, setCircles] = useState<Circle[]>([]);
     const [misses, setMisses] = useState(0);
@@ -100,7 +103,7 @@ export function GameScreen({ setScore, onGameOver, circleStyle }: GameScreenProp
     return (
         <div ref={gameAreaRef} className="w-full h-full relative bg-background overflow-hidden" onClick={() => !isPaused && setMisses(m => m + 1)}>
           <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-background/80 backdrop-blur-sm z-10">
-            <div className="text-2xl font-bold font-headline">Score: {internalScore}</div>
+            <div className="text-2xl font-bold font-headline">{t.game.score}: {internalScore}</div>
             <div className="flex items-center gap-2 text-xl font-bold text-destructive">
               <XOctagon />
               <span>{misses}/{MAX_MISSES}</span>
@@ -126,8 +129,8 @@ export function GameScreen({ setScore, onGameOver, circleStyle }: GameScreenProp
           
           {isPaused && (
             <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-20" onClick={() => setIsPaused(false)}>
-              <h2 className="text-6xl font-bold text-white mb-8 animate-pulse font-headline">PAUSED</h2>
-              <Button onClick={() => setIsPaused(false)} size="lg" className="rounded-full">Resume</Button>
+              <h2 className="text-6xl font-bold text-white mb-8 animate-pulse font-headline">{t.game.paused}</h2>
+              <Button onClick={() => setIsPaused(false)} size="lg" className="rounded-full">{t.game.resume}</Button>
             </div>
           )}
         </div>
