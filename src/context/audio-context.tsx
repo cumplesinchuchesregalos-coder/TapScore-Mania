@@ -14,12 +14,14 @@ const AudioContext = createContext<AudioContextType | undefined>(undefined);
 export const AudioProvider = ({ children }: { children: ReactNode }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [sfx, setSfx] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const storedMute = localStorage.getItem('tapscore_isMuted');
     if (storedMute) {
       setIsMuted(JSON.parse(storedMute));
     }
+    setSfx(new Audio());
     setHydrated(true);
   }, []);
 
@@ -32,11 +34,11 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const playSfx = useCallback((sfxUrl: string) => {
-    if (!isMuted) {
-      const audio = new Audio(sfxUrl);
-      audio.play().catch(e => console.error("Error playing SFX:", e));
+    if (!isMuted && sfx) {
+      sfx.src = sfxUrl;
+      sfx.play().catch(e => console.error("Error playing SFX:", e));
     }
-  }, [isMuted]);
+  }, [isMuted, sfx]);
   
   const value = { isMuted, toggleMute, playSfx };
 

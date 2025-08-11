@@ -1,19 +1,15 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAudio } from '@/context/audio-context';
+
+// Silent WAV file as a Data URI to prevent "no supported sources" error if no music is provided.
+const SILENT_AUDIO_SRC = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
 
 const AudioController = () => {
   const { isMuted } = useAudio();
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [audioSrc, setAudioSrc] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    // We need to set the source on the client side to ensure it's loaded correctly.
-    setAudioSrc("/audio/background-music.mp3");
-  }, []);
-
 
   useEffect(() => {
     if (audioRef.current) {
@@ -21,34 +17,40 @@ const AudioController = () => {
     }
   }, [isMuted]);
 
-  // This effect ensures music starts after first user interaction
   useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
     const playMusic = () => {
-      if (audioRef.current && audioRef.current.paused) {
-        audioRef.current.play().catch(e => console.error("Error playing music:", e));
+      if (audio.paused) {
+        audio.play().catch(e => console.error("Error playing music:", e));
       }
       window.removeEventListener('click', playMusic);
-    }
-    
-    // Autoplay is often blocked, user interaction is needed
-    if (audioRef.current) {
-        audioRef.current.play().then(() => {
-             window.removeEventListener('click', playMusic);
-        }).catch(e => {
-            console.log("Waiting for user interaction to play music.");
-            window.addEventListener('click', playMusic);
-        });
-    }
+      window.removeEventListener('touchstart', playMusic);
+    };
 
+    const handlePlayPromise = audio.play();
+
+    if (handlePlayPromise !== undefined) {
+      handlePlayPromise.then(() => {
+        // Autoplay started!
+        window.removeEventListener('click', playMusic);
+        window.removeEventListener('touchstart', playMusic);
+      }).catch(error => {
+        // Autoplay was prevented.
+        console.log("Waiting for user interaction to play music.");
+        window.addEventListener('click', playMusic, { once: true });
+        window.addEventListener('touchstart', playMusic, { once: true });
+      });
+    }
 
     return () => {
-        window.removeEventListener('click', playMusic);
-    }
-  }, [audioSrc]);
+      window.removeEventListener('click', playMusic);
+      window.removeEventListener('touchstart', playMusic);
+    };
+  }, []);
 
-  if (!audioSrc) return null;
-
-  return <audio ref={audioRef} src={audioSrc} loop />;
+  return <audio ref={audioRef} src={SILENT_AUDIO_SRC} loop />;
 };
 
 export default AudioController;
