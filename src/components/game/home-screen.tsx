@@ -2,8 +2,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Trophy, ShoppingCart, Settings, Gamepad2 } from "lucide-react";
+import { Trophy, ShoppingCart, Settings, Gamepad2, Volume2, VolumeX } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
+import { useAudio } from "@/context/audio-context";
 import {
   Select,
   SelectContent,
@@ -35,6 +36,7 @@ const TappingIcon = () => (
 
 export function HomeScreen({ onNavigate, highScore }: HomeScreenProps) {
   const { t, language, setLanguage } = useLanguage();
+  const { isMuted, toggleMute } = useAudio();
 
   const handleLanguageChange = (value: string) => {
     const lang = value as 'en' | 'es';
@@ -61,6 +63,9 @@ export function HomeScreen({ onNavigate, highScore }: HomeScreenProps) {
                   <SelectItem value="es">Español</SelectItem>
               </SelectContent>
             </Select>
+            <Button variant="ghost" size="icon" onClick={toggleMute} className="rounded-full">
+              {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+            </Button>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Settings className="w-6 h-6" />
             </Button>
