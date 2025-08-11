@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Pause, Play, XOctagon, Heart, Shield } from 'lucide-react';
+import { Pause, Play, Heart, Shield, Gem, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/language-context';
 import type { GameMode, Difficulty } from '@/app/page';
@@ -11,33 +11,38 @@ const CIRCLE_DIAMETER = 60;
 
 const DIFFICULTY_SETTINGS = {
   easy: {
-    lifespan: 3500,
     initialSpawn: 2000,
     rateDecrement: 15,
   },
   normal: {
-    lifespan: 3000,
     initialSpawn: 1500,
     rateDecrement: 25,
   },
   hard: {
-    lifespan: 2500,
     initialSpawn: 1000,
     rateDecrement: 35,
   },
 };
+
+const CIRCLE_TYPES = [
+    { type: 'default', color: 'bg-primary', points: 1, lifespan: 2500, probability: 0.5 },
+    { type: 'fast', color: 'bg-accent', points: 2, lifespan: 1500, probability: 0.3 },
+    { type: 'very_fast', color: 'bg-chart-2', points: 3, lifespan: 1000, probability: 0.15 },
+    { type: 'rare', color: 'bg-chart-4', points: 10, lifespan: 800, probability: 0.05, icon: Gem },
+];
 
 interface Circle {
   id: number;
   x: number;
   y: number;
   createdAt: number;
+  type: typeof CIRCLE_TYPES[number];
 }
 
 interface GameScreenProps {
   setScore: React.Dispatch<React.SetStateAction<number>>;
   onGameOver: (finalScore: number) => void;
-  circleStyle: string;
+  circleStyle: string; // This is now a base style, but we'll use circle types
   gameMode: GameMode;
   difficulty: Difficulty;
 }
@@ -48,6 +53,8 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
     const [circles, setCircles] = useState<Circle[]>([]);
     const [misses, setMisses] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
+    const [combo, setCombo] = useState(1);
+    const [consecutiveHits, setConsecutiveHits] = useState(0);
 
     const gameAreaRef = useRef<HTMLDivElement>(null);
     const animationFrameId = useRef<number>();
@@ -55,16 +62,32 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
     const spawnRate = useRef(DIFFICULTY_SETTINGS[difficulty].initialSpawn);
 
     const settings = DIFFICULTY_SETTINGS[difficulty];
-    const circleLifespan = settings.lifespan;
-    
     const maxMisses = gameMode === 'survival' ? 1 : 3;
+
+    const resetCombo = () => {
+        setConsecutiveHits(0);
+        setCombo(1);
+    }
 
     const handleCircleClick = (e: React.MouseEvent, id: number) => {
         e.stopPropagation();
         if (isPaused) return;
 
+        const circle = circles.find(c => c.id === id);
+        if (!circle) return;
+
         setCircles(prev => prev.filter(c => c.id !== id));
-        const newScore = internalScore + 1;
+        
+        const newHits = consecutiveHits + 1;
+        setConsecutiveHits(newHits);
+
+        if (newHits > 0 && newHits % 5 === 0) {
+            setCombo(prev => prev + 1);
+        }
+
+        const pointsGained = circle.type.points * combo;
+        const newScore = internalScore + pointsGained;
+
         setInternalScore(newScore);
         setScore(newScore);
 
@@ -75,6 +98,12 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
 
         spawnRate.current = Math.max(300, spawnRate.current - rateDecrement);
     };
+    
+    const handleMiss = () => {
+        if(isPaused) return;
+        setMisses(m => m + 1);
+        resetCombo();
+    }
 
     const gameLoop = useCallback(() => {
         if (!gameAreaRef.current) {
@@ -87,7 +116,7 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
         if (!isPaused) {
             let missedCount = 0;
             const updatedCircles = circles.filter(circle => {
-                if (now - circle.createdAt > circleLifespan) {
+                if (now - circle.createdAt > circle.type.lifespan) {
                     missedCount++;
                     return false;
                 }
@@ -96,23 +125,38 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
 
             if (missedCount > 0) {
                 setCircles(updatedCircles);
-                setMisses(prev => Math.min(maxMisses, prev + missedCount));
+                setMisses(prev => {
+                    const newMisses = prev + missedCount;
+                    if (newMisses > prev) { // A miss occurred
+                        resetCombo();
+                    }
+                    return Math.min(maxMisses, newMisses);
+                });
             }
 
             if (now - lastSpawnTime.current > spawnRate.current) {
                 lastSpawnTime.current = now;
+                
+                const rand = Math.random();
+                let cumulativeProb = 0;
+                const circleType = CIRCLE_TYPES.find(ct => {
+                    cumulativeProb += ct.probability;
+                    return rand <= cumulativeProb;
+                }) || CIRCLE_TYPES[0];
+
                 const { width, height } = gameAreaRef.current.getBoundingClientRect();
                 const newCircle: Circle = {
                     id: Date.now() + Math.random(),
                     x: Math.random() * (width - CIRCLE_DIAMETER),
                     y: Math.random() * (height - CIRCLE_DIAMETER - 80) + 80,
                     createdAt: Date.now(),
+                    type: circleType,
                 };
                 setCircles(prev => [...prev, newCircle]);
             }
         }
         animationFrameId.current = requestAnimationFrame(gameLoop);
-    }, [isPaused, circles, maxMisses, circleLifespan]);
+    }, [isPaused, circles, maxMisses, difficulty]);
 
     useEffect(() => {
         animationFrameId.current = requestAnimationFrame(gameLoop);
@@ -147,9 +191,17 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
     }
     
     return (
-        <div ref={gameAreaRef} className="w-full h-full relative bg-background overflow-hidden" onClick={() => !isPaused && setMisses(m => m + 1)}>
+        <div ref={gameAreaRef} className="w-full h-full relative bg-background overflow-hidden" onClick={handleMiss}>
           <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-background/80 backdrop-blur-sm z-10">
-            <div className="text-2xl font-bold font-headline">{t.game.score}: {internalScore}</div>
+            <div className="text-2xl font-bold font-headline flex items-center gap-4">
+              <span>{t.game.score}: {internalScore}</span>
+              {combo > 1 && (
+                <div className="flex items-center gap-1 text-yellow-500 animate-scale-in">
+                    <Zap className="h-6 w-6" />
+                    <span className="font-bold text-2xl">x{combo}</span>
+                </div>
+              )}
+            </div>
             
             {renderLives()}
 
@@ -158,19 +210,24 @@ export function GameScreen({ setScore, onGameOver, circleStyle, gameMode, diffic
             </Button>
           </div>
 
-          {circles.map(circle => (
-            <div
-              key={circle.id}
-              className={`absolute cursor-pointer animate-scale-in transition-all duration-200 hover:scale-110 active:scale-95 ${circleStyle}`}
-              style={{
-                left: circle.x,
-                top: circle.y,
-                width: CIRCLE_DIAMETER,
-                height: CIRCLE_DIAMETER,
-              }}
-              onClick={(e) => handleCircleClick(e, circle.id)}
-            />
-          ))}
+          {circles.map(circle => {
+            const Icon = circle.type.icon;
+            return (
+              <div
+                key={circle.id}
+                className={`absolute cursor-pointer animate-scale-in transition-all duration-200 hover:scale-110 active:scale-95 rounded-full flex items-center justify-center text-white font-bold text-sm ${circle.type.color}`}
+                style={{
+                  left: circle.x,
+                  top: circle.y,
+                  width: CIRCLE_DIAMETER,
+                  height: CIRCLE_DIAMETER,
+                }}
+                onClick={(e) => handleCircleClick(e, circle.id)}
+              >
+                {Icon ? <Icon className="h-6 w-6" /> : `+${circle.type.points}`}
+              </div>
+            )
+          })}
           
           {isPaused && (
             <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-20" onClick={() => setIsPaused(false)}>
