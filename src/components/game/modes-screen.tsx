@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { ArrowLeft, Gamepad2, Shield, Target, Bomb, Lock, Check } from "lucide-react";
+import { ArrowLeft, Gamepad2, Shield, Target, Bomb, Lock, Check, Users } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import type { GameMode, Difficulty } from "@/app/page";
 
@@ -25,6 +25,7 @@ export function ModesScreen({ onBack, onSelectMode, gamesPlayed, survivalHighSco
   const modes = [
     { id: 'classic', icon: Gamepad2, title: t.modes.classic.title, description: t.modes.classic.description, enabled: true },
     { id: 'survival', icon: Shield, title: t.modes.survival.title, description: t.modes.survival.description, enabled: true },
+    { id: 'duo', icon: Users, title: t.modes.duo.title, description: t.modes.duo.description, enabled: true },
     { id: 'precision', icon: Target, title: t.modes.precision.title, description: t.modes.precision.description, enabled: precisionUnlocked, unlockCondition: t.modes.unlockConditions.precision },
     { id: 'bomb', icon: Bomb, title: t.modes.bomb.title, description: t.modes.bomb.description, enabled: bombUnlocked, unlockCondition: t.modes.unlockConditions.bomb },
   ];
@@ -35,9 +36,14 @@ export function ModesScreen({ onBack, onSelectMode, gamesPlayed, survivalHighSco
       { id: 'hard', label: t.modes.difficulty.hard },
   ]
 
-  const handleModeClick = (mode: GameMode) => {
-    if (modes.find(m => m.id === mode)?.enabled) {
-      setSelectedMode(current => current === mode ? null : mode);
+  const handleModeClick = (modeId: GameMode) => {
+    const mode = modes.find(m => m.id === modeId);
+    if (mode?.enabled) {
+      if (mode.id === 'duo') {
+        onSelectMode('duo', 'normal'); // Duo mode doesn't need difficulty selection
+      } else {
+        setSelectedMode(current => current === modeId ? null : modeId);
+      }
     }
   }
 
@@ -72,7 +78,7 @@ export function ModesScreen({ onBack, onSelectMode, gamesPlayed, survivalHighSco
                       {mode.enabled ? <Check className="w-6 h-6 text-green-500" /> : <Lock className="w-6 h-6 text-muted-foreground" />}
                     </div>
                 </CardHeader>
-                {selectedMode === mode.id && mode.enabled && (
+                {selectedMode === mode.id && mode.id !== 'duo' && mode.enabled && (
                     <CardFooter className="flex justify-around bg-muted/50 p-2">
                         {difficulties.map(d => (
                             <Button 

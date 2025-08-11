@@ -20,6 +20,14 @@ export interface Translation {
     highScore: string;
     retry: string;
     home: string;
+    duo: {
+        title: string;
+        player1: string;
+        player2: string;
+        wins: string;
+        tie: string;
+        rematch: string;
+    }
   };
   shop: {
     title: string;
@@ -45,6 +53,10 @@ export interface Translation {
           description: string;
       },
       bomb: {
+          title: string;
+          description: string;
+      },
+      duo: {
           title: string;
           description: string;
       },
@@ -92,6 +104,14 @@ const en: Translation = {
     highScore: "High Score",
     retry: "RETRY",
     home: "Home",
+    duo: {
+        title: "RESULTS",
+        player1: "Player 1",
+        player2: "Player 2",
+        wins: "WINS!",
+        tie: "IT'S A TIE!",
+        rematch: "REMATCH"
+    }
   },
   shop: {
     title: "Shop",
@@ -126,6 +146,10 @@ const en: Translation = {
       bomb: {
           title: "Bomb Squad",
           description: "Avoid the bombs at all cost!"
+      },
+      duo: {
+          title: "Duo Mode",
+          description: "Challenge a friend on the same device!"
       },
       unlockConditions: {
         precision: "Play 3 games to unlock.",
@@ -171,6 +195,14 @@ const es: Translation = {
     highScore: "Puntuación Máxima",
     retry: "REINTENTAR",
     home: "Inicio",
+    duo: {
+        title: "RESULTADOS",
+        player1: "Jugador 1",
+        player2: "Jugador 2",
+        wins: "¡GANA!",
+        tie: "¡EMPATE!",
+        rematch: "REVANCHA"
+    }
   },
   shop: {
     title: "Tienda",
@@ -205,6 +237,10 @@ const es: Translation = {
       bomb: {
           title: "Antiexplosivos",
           description: "¡Evita las bombas a toda costa!"
+      },
+      duo: {
+          title: "Modo Dúo",
+          description: "¡Reta a un amigo en el mismo dispositivo!"
       },
       unlockConditions: {
         precision: "Juega 3 partidas para desbloquear.",

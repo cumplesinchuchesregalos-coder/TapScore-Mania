@@ -24,6 +24,7 @@ export default function Home() {
   const [difficulty, setDifficulty] = useState<Difficulty>("normal");
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
+  const [finalScores, setFinalScores] = useState<[number, number] | null>(null);
   const [currency, setCurrency] = useState(0);
   const [unlockedItems, setUnlockedItems] = useState<string[]>(['style_default']);
   const [activeItem, setActiveItem] = useState<string>('style_default');
@@ -56,18 +57,24 @@ export default function Home() {
 
   const handleStartGame = (mode: GameMode, difficulty: Difficulty) => {
     setScore(0);
+    setFinalScores(null);
     setGameMode(mode);
     setDifficulty(difficulty);
     setGameState("game");
   };
 
-  const handleGameOver = useCallback((finalScore: number) => {
+  const handleGameOver = useCallback((finalScore: number, finalScores?: [number, number]) => {
     setGameState("game-over");
+    setScore(finalScore);
+    if(finalScores) {
+      setFinalScores(finalScores);
+    }
+
     const newCurrency = currency + Math.floor(finalScore / 5);
     setCurrency(newCurrency);
     localStorage.setItem("tapscore_currency", newCurrency.toString());
 
-    if (finalScore > highScore) {
+    if (gameMode !== 'duo' && finalScore > highScore) {
       setHighScore(finalScore);
       localStorage.setItem("tapscore_highScore", finalScore.toString());
     }
@@ -112,9 +119,9 @@ export default function Home() {
   const renderGameState = () => {
     switch (gameState) {
       case "game":
-        return <GameScreen setScore={setScore} onGameOver={handleGameOver} circleStyle={activeItemStyle} gameMode={gameMode} difficulty={difficulty} />;
+        return <GameScreen onGameOver={handleGameOver} circleStyle={activeItemStyle} gameMode={gameMode} difficulty={difficulty} />;
       case "game-over":
-        return <GameOverScreen score={score} highScore={highScore} onRestart={() => handleStartGame(gameMode, difficulty)} onHome={() => setGameState("home")} />;
+        return <GameOverScreen score={score} highScore={highScore} onRestart={() => handleStartGame(gameMode, difficulty)} onHome={() => setGameState("home")} gameMode={gameMode} finalScores={finalScores} />;
       case "shop":
         return <ShopScreen 
                   currency={currency} 
