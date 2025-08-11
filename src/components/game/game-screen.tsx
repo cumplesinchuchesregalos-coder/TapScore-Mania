@@ -381,41 +381,55 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
         const activeItem = SHOP_ITEMS.find(i => i.id === activeItemId);
     
         return circles.filter(c => c.player === player).map(circle => {
-          const Icon = circle.type.icon;
-          // Use the active item's image if it exists and the circle is not a special type like a bomb or precision target.
-          const useActiveItemImage = activeItem?.imageUrl && !Icon;
+            const Icon = circle.type.icon;
     
-          return (
-            <div
-              key={circle.id}
-              className="absolute cursor-pointer animate-scale-in transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center text-white font-bold text-sm"
-              style={{
-                left: circle.x,
-                top: circle.y,
-                width: circleDiameter,
-                height: circleDiameter,
-              }}
-              onClick={(e) => handleCircleClick(e, circle.id)}
-            >
-              {useActiveItemImage ? (
-                <Image
-                  src={activeItem!.imageUrl!}
-                  alt={activeItem!.name}
-                  width={circleDiameter}
-                  height={circleDiameter}
-                  data-ai-hint={activeItem!.imageHint}
-                />
-              ) : Icon ? (
-                <div className={cn('w-full h-full flex items-center justify-center rounded-full', circle.type.color)}>
-                  <Icon className="h-8 w-8" />
+            // Determine what to render for the circle
+            let circleContent;
+    
+            if (Icon) {
+                // Special circles with icons (Bomb, Target, Gem)
+                circleContent = (
+                    <div className={cn('w-full h-full flex items-center justify-center rounded-full', circle.type.color)}>
+                        <Icon className="h-8 w-8" />
+                    </div>
+                );
+            } else if (activeItem?.imageUrl) {
+                // Active item is an image
+                circleContent = (
+                    <Image
+                        src={activeItem.imageUrl}
+                        alt={activeItem.name}
+                        width={circleDiameter}
+                        height={circleDiameter}
+                        data-ai-hint={activeItem.imageHint}
+                        className="object-contain"
+                    />
+                );
+            } else {
+                // Regular colored circle (either from active item or circle type)
+                const colorClass = circle.type.type === 'default' ? activeItem?.className : circle.type.color;
+                circleContent = (
+                    <div className={cn('w-full h-full flex items-center justify-center rounded-full text-white font-bold text-sm', colorClass)}>
+                         {circle.type.points > 0 ? `+${circle.type.points}` : ''}
+                    </div>
+                );
+            }
+
+            return (
+                <div
+                    key={circle.id}
+                    className="absolute cursor-pointer animate-scale-in transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center"
+                    style={{
+                        left: circle.x,
+                        top: circle.y,
+                        width: circleDiameter,
+                        height: circleDiameter,
+                    }}
+                    onClick={(e) => handleCircleClick(e, circle.id)}
+                >
+                    {circleContent}
                 </div>
-              ) : (
-                <div className={cn('w-full h-full flex items-center justify-center rounded-full', circle.type.type === 'default' ? activeItem?.className : circle.type.color)}>
-                  {circle.type.points > 0 ? `+${circle.type.points}` : ''}
-                </div>
-              )}
-            </div>
-          );
+            );
         });
       };
     
@@ -489,5 +503,3 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
         </div>
     );
 }
-
-    
