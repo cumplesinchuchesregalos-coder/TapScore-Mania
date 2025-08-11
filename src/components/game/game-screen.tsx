@@ -413,7 +413,6 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
                       alt={activeItem.name}
                       width={circleDiameter}
                       height={circleDiameter}
-                      className="rounded-full"
                       data-ai-hint={activeItem.imageHint}
                     />
                 ) : Icon ? (

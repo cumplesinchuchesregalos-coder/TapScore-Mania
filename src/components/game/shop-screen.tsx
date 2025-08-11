@@ -56,7 +56,6 @@ export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, on
                             alt={item.name}
                             width={64}
                             height={64}
-                            className="rounded-full"
                             data-ai-hint={item.imageHint}
                           />
                         ) : null}
