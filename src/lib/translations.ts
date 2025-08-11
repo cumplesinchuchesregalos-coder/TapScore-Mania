@@ -224,8 +224,8 @@ const es: Translation = {
     style_forest: { name: "Verde Bosque", description: "Una apariencia tranquila y natural." },
     style_golden: { name: "Vara de Oro", description: "Demuestra tu estilo prémium." },
     style_square: { name: "El Cuadrado", description: "¿Quién dijo que los círculos son la única forma?" },
-    style_ring: { name: "El Anillo", description: "Los círculos son un 20% más grandes, más fáciles de acertar." },
-    style_ghost: { name: "Fantasma", description: "Tu primer fallo en una partida no cuenta. ¡Uno de regalo!" },
+    style_ring: { name: "El Anillo", description: "Círculos 20% más grandes, ¡más fáciles de acertar!" },
+    style_ghost: { name: "Fantasma", description: "Tu primer fallo no cuenta. ¡Una vida extra por partida!" },
   },
   modes: {
       title: "Elige un Modo",
