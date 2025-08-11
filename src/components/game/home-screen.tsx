@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Trophy, ShoppingCart, Settings, Gamepad2 } from "lucide-react";
+import { Trophy, ShoppingCart, Settings, Gamepad2, HandMetal } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import {
   Select,
@@ -18,6 +18,13 @@ interface HomeScreenProps {
   onShop: () => void;
   highScore: number;
 }
+
+const TappingIcon = () => (
+  <div className="relative inline-block w-16 h-16">
+    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-primary rounded-full" />
+    <HandMetal className="absolute top-0 right-0 w-8 h-8 text-foreground transform -rotate-45" />
+  </div>
+);
 
 export function HomeScreen({ onPlay, onShop, highScore }: HomeScreenProps) {
   const { t, language, setLanguage } = useLanguage();
@@ -47,7 +54,8 @@ export function HomeScreen({ onPlay, onShop, highScore }: HomeScreenProps) {
       </div>
 
       <div className="flex flex-col items-center">
-        <h1 className="text-6xl sm:text-7xl font-headline font-bold text-primary animate-pulse">
+        <TappingIcon />
+        <h1 className="text-6xl sm:text-7xl font-headline font-bold text-primary animate-pulse mt-4">
           {t.home.title}
         </h1>
         <p className="text-2xl text-muted-foreground font-headline">{t.home.subtitle}</p>

@@ -25,8 +25,21 @@ export default function Home() {
   useEffect(() => {
     setHighScore(parseInt(localStorage.getItem("tapscore_highScore") || "0", 10));
     setCurrency(parseInt(localStorage.getItem("tapscore_currency") || "50", 10));
-    setUnlockedItems(JSON.parse(localStorage.getItem("tapscore_unlockedItems") || "[\"style_default\"]"));
-    setActiveItem(localStorage.getItem("tapscore_activeItem") || "style_default");
+    
+    const storedUnlocked = localStorage.getItem("tapscore_unlockedItems");
+    if (storedUnlocked) {
+      setUnlockedItems(JSON.parse(storedUnlocked));
+    } else {
+      localStorage.setItem("tapscore_unlockedItems", JSON.stringify(['style_default']));
+    }
+
+    const storedActive = localStorage.getItem("tapscore_activeItem");
+    if (storedActive) {
+      setActiveItem(storedActive);
+    } else {
+      localStorage.setItem("tapscore_activeItem", 'style_default');
+    }
+
     setHydrated(true);
   }, []);
 
