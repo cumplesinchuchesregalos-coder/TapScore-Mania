@@ -119,7 +119,7 @@ export default function Home() {
   const renderGameState = () => {
     switch (gameState) {
       case "game":
-        return <GameScreen onGameOver={handleGameOver} circleStyle={activeItemStyle} gameMode={gameMode} difficulty={difficulty} />;
+        return <GameScreen onGameOver={handleGameOver} circleStyle={activeItem} gameMode={gameMode} difficulty={difficulty} />;
       case "game-over":
         return <GameOverScreen score={score} highScore={highScore} onRestart={() => handleStartGame(gameMode, difficulty)} onHome={() => setGameState("home")} gameMode={gameMode} finalScores={finalScores} />;
       case "shop":

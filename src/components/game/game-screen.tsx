@@ -10,6 +10,7 @@ import type { GameMode, Difficulty } from '@/app/page';
 import { SFX } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
 import { SHOP_ITEMS } from '@/lib/shop-items';
+import Image from "next/image";
 
 interface Circle {
   id: number;
@@ -378,11 +379,20 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
 
     const renderCircles = (player?: 1 | 2) => {
         const activeItem = SHOP_ITEMS.find(i => i.id === activeItemId);
-        const itemClassName = activeItem?.className || 'bg-primary rounded-full';
 
         return circles.filter(c => c.player === player).map(circle => {
             const Icon = circle.type.icon;
-            const finalCircleStyle = circle.type.type === 'default' ? itemClassName : circle.type.color;
+            
+            const useImage = circle.type.type === 'default' && activeItem?.imageUrl;
+            
+            let finalCircleStyle = '';
+            if (useImage) {
+                finalCircleStyle = 'bg-transparent';
+            } else if (circle.type.type === 'default') {
+                finalCircleStyle = activeItem?.className || 'bg-primary rounded-full';
+            } else {
+                finalCircleStyle = circle.type.color;
+            }
             
             return (
               <div
@@ -396,7 +406,20 @@ export function GameScreen({ onGameOver, circleStyle: activeItemId, gameMode, di
                 }}
                 onClick={(e) => handleCircleClick(e, circle.id)}
               >
-                {Icon ? <Icon className="h-8 w-8" /> : (circle.type.points > 0 ? `+${circle.type.points}`: '')}
+                {useImage && activeItem?.imageUrl ? (
+                   <Image 
+                      src={activeItem.imageUrl} 
+                      alt={activeItem.name}
+                      width={circleDiameter}
+                      height={circleDiameter}
+                      className="rounded-full"
+                      data-ai-hint={activeItem.imageHint}
+                    />
+                ) : Icon ? (
+                    <Icon className="h-8 w-8" />
+                ) : (
+                    circle.type.points > 0 ? `+${circle.type.points}` : ''
+                )}
               </div>
             )
           })

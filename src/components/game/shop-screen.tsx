@@ -8,6 +8,7 @@ import { ArrowLeft, Check, Lock, Gem } from "lucide-react";
 import { SHOP_ITEMS, type ShopItem } from "@/lib/shop-items";
 import { useLanguage } from "@/context/language-context";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface ShopScreenProps {
   currency: number;
@@ -49,6 +50,16 @@ export function ShopScreen({ currency, unlockedItems, activeItem, onPurchase, on
                     </CardHeader>
                     <CardContent className="flex items-center justify-center p-4 flex-grow">
                       <div className={cn('w-16 h-16 transition-all duration-300 flex items-center justify-center', item.className, isActive ? 'ring-4 ring-offset-2 ring-primary' : '')}>
+                        {item.imageUrl && (
+                          <Image 
+                            src={item.imageUrl} 
+                            alt={item.name}
+                            width={64}
+                            height={64}
+                            className="rounded-full"
+                            data-ai-hint={item.imageHint}
+                          />
+                        )}
                       </div>
                     </CardContent>
                     <CardFooter className="p-2">
