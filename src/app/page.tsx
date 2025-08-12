@@ -1,6 +1,7 @@
 
 "use client";
 
+
 import { useState, useEffect, useCallback } from "react";
 import { HomeScreen } from "@/components/game/home-screen";
 import { GameScreen } from "@/components/game/game-screen";
@@ -37,6 +38,19 @@ export default function Home() {
   const [survivalHighScore, setSurvivalHighScore] = useState(0);
   const [shopItems, setShopItems] = useState<ShopItem[]>(SHOP_ITEMS);
   const [isGeneratingImages, setIsGeneratingImages] = useState(true);
+
+  // Register service worker
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
+    }
+  }, []);
 
   useEffect(() => {
     const loadGameData = async () => {
